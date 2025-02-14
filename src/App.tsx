@@ -1,6 +1,7 @@
 import { useEffect } from 'react'
 import { Routes, Route, useLocation } from 'react-router-dom'
 import Home from './pages/Home'
+import Diagnostic from './pages/Diagnostic'
 import NotFound from './pages/NotFound'
 import Registration from './pages/Registration'
 import { Toaster } from './components/ui/sonner'
@@ -19,7 +20,8 @@ function App() {
 
   useEffect(() => {
     console.log('[App] Route changed to:', location.pathname)
-  }, [location])
+    window.scrollTo(0, 0)
+  }, [location.pathname])
 
   console.log('[App] Rendering component')
 
@@ -27,6 +29,7 @@ function App() {
     <>
       <Routes>
         <Route path="/" element={<Home />} />
+        <Route path="/diagnostic" element={<Diagnostic />} />
         <Route path="/inscription" element={<Registration />} />
         <Route path="*" element={<NotFound />} />
       </Routes>

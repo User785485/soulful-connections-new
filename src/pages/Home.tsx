@@ -5,9 +5,14 @@ import { CheckCircle2, Users, BookOpen } from "lucide-react";
 import Header from "@/components/Header";
 import Hero from "@/components/Hero";
 import FAQ from "@/components/FAQ";
+import TypeformButton from "@/components/TypeformButton";
 
 const Home: React.FC = () => {
   useEffect(() => {
+    // S'assurer que le scroll est activé quand on arrive sur la page d'accueil
+    document.body.style.overflow = 'auto';
+    document.body.style.overflowX = 'hidden';
+    
     const observerOptions: IntersectionObserverInit = {
       root: null,
       rootMargin: "0px",
@@ -26,52 +31,25 @@ const Home: React.FC = () => {
       observer.observe(el);
     });
 
-    return () => observer.disconnect();
+    return () => {
+      observer.disconnect();
+    };
   }, []);
-
-  const redirectToTypeform = () => {
-    window.location.href = "https://form.typeform.com/to/tKsQmWPq";
-  };
 
   return (
     <>
       <Helmet>
-        <meta charSet="UTF-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>My Muqabala - Agence matrimoniale musulmane</title>
         <meta
           name="description"
-          content="My Muqabala - Rencontres Islamiques : Trouve l'amour authentique en respectant les valeurs islamiques grâce à une approche personnalisée, des experts et une formation continue."
+          content="Trouvez l'amour selon vos valeurs avec My Muqabala, l'agence matrimoniale musulmane qui vous accompagne de A à Z."
         />
-        <title>My Muqabala - Rencontres Islamiques</title>
-        <link
-          href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
-          rel="stylesheet"
-        />
-        <style>
-          {`
-            body {
-              font-family: 'Poppins', sans-serif;
-            }
-            .custom-select {
-              appearance: none;
-              background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
-              background-repeat: no-repeat;
-              background-position: right 1rem center;
-              background-size: 1em;
-            }
-            .search-box {
-              background: rgba(255, 255, 255, 0.95);
-              backdrop-filter: blur(10px);
-              border-radius: 20px;
-              box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-            }
-          `}
-        </style>
       </Helmet>
 
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
         <Header />
         <Hero />
+        {/* Espacement pour le header fixe */}
         <div className="h-[calc(theme(spacing.14)+theme(spacing.6))] md:h-[calc(theme(spacing.16)+theme(spacing.6))]" />
         
         <div className="w-full px-4 sm:px-8 pt-12 max-w-7xl mx-auto">
@@ -145,7 +123,7 @@ const Home: React.FC = () => {
                   initial={{ opacity: 0, y: 20 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
-                  transition={{ duration: 0.6, delay: index * 0.2 }}
+                  transition={{ duration: 0.6 }}
                   className="bg-white p-8 rounded-2xl shadow-2xl transform transition-transform duration-300 hover:scale-105"
                 >
                   <h3 className="text-xl font-bold text-blue-600 mb-4">{item.title}</h3>
@@ -388,42 +366,20 @@ const Home: React.FC = () => {
 
           <FAQ />
 
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            id="diagnostic"
-            className="text-center py-16"
-          >
-            <h2 className="text-4xl font-bold text-pink-600 mb-8">
-              Prête à commencer l'aventure ?
-            </h2>
-            <button
-              onClick={redirectToTypeform}
-              className="bg-gradient-to-r from-pink-500 to-purple-600 text-white text-xl font-bold py-6 px-12 rounded-full shadow-2xl hover:shadow-2xl transform transition-all duration-300 hover:scale-105 hover:opacity-90"
-            >
-              Je commence mon diagnostic gratuit →
-            </button>
-          </motion.div>
+          <section className="py-20 bg-gradient-to-br from-pink-50 to-purple-50">
+            <div className="container mx-auto px-4 text-center">
+              <h2 className="text-4xl font-bold text-gray-900 mb-8">
+                Prête à commencer l'aventure ?
+              </h2>
+              <TypeformButton
+                className="bg-gradient-to-r from-pink-500 to-purple-600 text-white text-xl font-bold py-6 px-12 rounded-full shadow-2xl hover:shadow-2xl transform transition-all duration-300 hover:scale-105 hover:opacity-90"
+              >
+                Je commence mon diagnostic gratuit →
+              </TypeformButton>
+            </div>
+          </section>
         </div>
       </div>
-
-      <footer className="bg-gray-900 text-white py-12">
-        <div className="container mx-auto px-4">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-            <div>
-              <h3 className="text-xl font-bold mb-4">My Muqabala</h3>
-              <p className="text-gray-400">
-                Votre partenaire de confiance pour des rencontres authentiques
-              </p>
-            </div>
-            {/* D'autres sections du footer peuvent être ajoutées ici */}
-          </div>
-          <div className="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
-            <p>&copy; 2024 My Muqabala. Tous droits réservés.</p>
-          </div>
-        </div>
-      </footer>
     </>
   );
 };

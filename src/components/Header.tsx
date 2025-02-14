@@ -1,17 +1,12 @@
-
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Menu, X } from "lucide-react";
 import React, { useState } from "react";
 import TopBanner from "./TopBanner";
+import TypeformButton from "./TypeformButton";
 
 const Header: React.FC = () => {
-  const navigate = useNavigate();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-
-  const handleClick = () => {
-    navigate('/inscription');
-  };
 
   return (
     <div className="fixed top-0 left-0 right-0 z-50">
@@ -38,12 +33,11 @@ const Header: React.FC = () => {
               >
                 Accueil
               </Link>
-              <Button
-                onClick={handleClick}
+              <TypeformButton
                 className="bg-gradient-to-r from-pink-500 to-purple-600 hover:opacity-90 text-white font-semibold px-4 md:px-6 py-2 rounded-full transition-all duration-300 transform hover:scale-105 shadow-md hover:shadow-lg"
               >
                 Commencer
-              </Button>
+              </TypeformButton>
             </nav>
 
             <button 
@@ -70,15 +64,11 @@ const Header: React.FC = () => {
                 >
                   Accueil
                 </Link>
-                <Button
-                  onClick={() => {
-                    handleClick();
-                    setIsMenuOpen(false);
-                  }}
+                <TypeformButton
                   className="w-full bg-gradient-to-r from-pink-500 to-purple-600 hover:opacity-90 text-white font-semibold px-4 py-2 rounded-full transition-opacity"
                 >
                   Commencer
-                </Button>
+                </TypeformButton>
               </div>
             </div>
           )}

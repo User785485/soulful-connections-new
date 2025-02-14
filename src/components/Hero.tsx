@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import OnboardingForm from "./OnboardingForm";
+import TypeformButton from "./TypeformButton";
 
 const Hero = () => {
   return (
@@ -61,19 +61,18 @@ const Hero = () => {
               className="w-32 h-[2px] bg-gradient-to-r from-transparent via-white/40 to-transparent mx-auto mb-12"
             />
 
-            {/* Zone de formulaire avec fond subtil */}
+            {/* Bouton CTA */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 0.7 }}
-              className="relative max-w-2xl mx-auto"
+              transition={{ duration: 0.6, delay: 0.7 }}
+              className="flex justify-center"
             >
-              {/* Fond subtil pour le formulaire */}
-              <div className="absolute -inset-8 bg-white/5 backdrop-blur-sm rounded-2xl" />
-              
-              <div className="relative">
-                <OnboardingForm />
-              </div>
+              <TypeformButton
+                className="bg-gradient-to-r from-pink-500 to-purple-600 text-white text-xl font-bold py-6 px-12 rounded-full shadow-2xl hover:shadow-2xl transform transition-all duration-300 hover:scale-105 hover:opacity-90"
+              >
+                Je commence mon diagnostic gratuit →
+              </TypeformButton>
             </motion.div>
           </div>
         </div>

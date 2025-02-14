@@ -1,14 +1,20 @@
-import { useTheme } from "next-themes"
+import { useEffect } from "react"
 import { Toaster as Sonner } from "sonner"
 
 type ToasterProps = React.ComponentProps<typeof Sonner>
 
 const Toaster = ({ ...props }: ToasterProps) => {
-  const { theme = "system" } = useTheme()
+  useEffect(() => {
+    console.log('[Toaster] Component mounted')
+    return () => {
+      console.log('[Toaster] Component unmounted')
+    }
+  }, [])
+
+  console.log('[Toaster] Rendering component')
 
   return (
     <Sonner
-      theme={theme as ToasterProps["theme"]}
       className="toaster group"
       toastOptions={{
         classNames: {
