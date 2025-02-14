@@ -49,13 +49,14 @@ const Home: React.FC = () => {
         <Header />
         <section className="relative min-h-screen overflow-hidden">
           {/* Vidéo en arrière-plan */}
-          <div className="absolute inset-0 w-full h-full z-0">
+          <div className="absolute inset-0 w-full h-full z-0 overflow-hidden">
             <video
               autoPlay
               loop
               muted
               playsInline
-              className="absolute min-w-full min-h-full object-cover"
+              className="absolute w-full h-full object-cover"
+              style={{ objectPosition: 'center' }}
             >
               <source src="https://cdn.muzz.com/website-v4/vid/hero-video.webm" type="video/webm" />
               Votre navigateur ne supporte pas la lecture de vidéos.
