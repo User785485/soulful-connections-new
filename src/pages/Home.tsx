@@ -3,7 +3,6 @@ import { useEffect } from "react";
 import { motion } from "framer-motion";
 import { CheckCircle2, Users, BookOpen } from "lucide-react";
 import Header from "@/components/Header";
-import Hero from "@/components/Hero";
 import FAQ from "@/components/FAQ";
 import TypeformButton from "@/components/TypeformButton";
 import OnboardingForm from "@/components/OnboardingForm";
