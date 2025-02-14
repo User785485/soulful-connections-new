@@ -1,5 +1,3 @@
-
-import React from 'react';
 import { Gift } from 'lucide-react';
 
 const TopBanner = () => {
@@ -18,4 +16,3 @@ const TopBanner = () => {
 };
 
 export default TopBanner;
-
