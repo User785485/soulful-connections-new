@@ -73,14 +73,14 @@ const Home: React.FC = () => {
                   initial={{ opacity: 0, y: 30 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.8 }}
-                  className="flex flex-col items-center mb-8"
+                  className="flex flex-col items-center mb-6"
                 >
                   <img 
                     src="https://i.postimg.cc/pLDv3V2L/Logo-def.png" 
                     alt="My Muqabala Logo" 
-                    className="w-24 h-24 mb-6"
+                    className="w-16 h-16 mb-4 sm:w-20 sm:h-20"
                   />
-                  <h1 className="text-5xl md:text-6xl font-serif">
+                  <h1 className="text-4xl md:text-5xl lg:text-6xl font-serif">
                     My Muqabala
                   </h1>
                 </motion.div>
@@ -90,7 +90,7 @@ const Home: React.FC = () => {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.6, delay: 0.3 }}
-                  className="text-xl md:text-2xl mb-12 max-w-3xl mx-auto"
+                  className="text-lg md:text-xl lg:text-2xl mb-8 max-w-3xl mx-auto"
                 >
                   Enfin une agence musulmane qui accompagne 
                   <span className="font-medium"> la rencontre amoureuse </span> 
@@ -102,7 +102,7 @@ const Home: React.FC = () => {
                   initial={{ scaleX: 0 }}
                   animate={{ scaleX: 1 }}
                   transition={{ duration: 0.8, delay: 0.5 }}
-                  className="w-32 h-[2px] bg-gradient-to-r from-transparent via-white/40 to-transparent mx-auto mb-12"
+                  className="w-32 h-[2px] bg-gradient-to-r from-transparent via-white/40 to-transparent mx-auto mb-8"
                 />
 
                 {/* Formulaire d'inscription */}
