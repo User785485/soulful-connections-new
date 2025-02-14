@@ -1,18 +1,25 @@
-
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 
+interface FormData {
+  experience: string
+  searchingFor: string
+}
+
 const OnboardingForm = () => {
   const navigate = useNavigate();
   const [currentStep, setCurrentStep] = useState(1);
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<FormData>({
     experience: '',
     searchingFor: ''
   });
 
-  const handleOptionSelect = (field, value) => {
-    setFormData({ ...formData, [field]: value });
+  const handleOptionSelect = (field: keyof FormData, value: string) => {
+    setFormData(prev => ({
+      ...prev,
+      [field]: value
+    }));
     if (currentStep < 2) {
       setTimeout(() => setCurrentStep(currentStep + 1), 500);
     }

@@ -1,10 +1,20 @@
 import { useEffect } from 'react'
 import { Routes, Route, useLocation } from 'react-router-dom'
-import Home from './pages/Home'
-import Diagnostic from './pages/Diagnostic'
-import NotFound from './pages/NotFound'
-import Registration from './pages/Registration'
-import { Toaster } from './components/ui/sonner'
+import { Toaster } from '@/components/ui/sonner'
+import Home from '@/pages/Home'
+import Diagnostic from '@/pages/Diagnostic'
+import NotFound from '@/pages/NotFound'
+import Registration from '@/pages/Registration'
+
+// Ajout de la déclaration pour import.meta.env
+declare global {
+  interface ImportMeta {
+    env: {
+      MODE: string;
+      [key: string]: string | undefined;
+    };
+  }
+}
 
 function App() {
   const location = useLocation()
