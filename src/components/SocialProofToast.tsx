@@ -1,5 +1,6 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useLayoutEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { createPortal } from 'react-dom'
 
 type Gender = 'f' | 'm'
 
@@ -82,8 +83,11 @@ interface SocialProofToastProps {
 }
 
 export default function SocialProofToast({ duration }: SocialProofToastProps) {
-  console.log('🎨 Rendering SocialProofToast, duration:', duration);
-  
+  console.log('🎨 [START] SocialProofToast Component Render');
+  console.log('📌 Props received:', { duration });
+
+  const [mounted, setMounted] = useState(false);
+  const [portalContainer, setPortalContainer] = useState<HTMLElement | null>(null);
   const [visible, setVisible] = useState(false)
   const [active, setActive] = useState(true)
   const [currentMessage, setCurrentMessage] = useState<ToastMessage>({
@@ -94,68 +98,132 @@ export default function SocialProofToast({ duration }: SocialProofToastProps) {
     time: 'à l\'instant'
   })
 
+  // Vérifier que document.body existe avant de créer le portail
+  useLayoutEffect(() => {
+    console.log('🏗️ [Layout Effect] Checking DOM availability');
+    try {
+      if (typeof document !== 'undefined') {
+        console.log('✅ document is defined');
+        if (document.body) {
+          console.log('✅ document.body exists');
+          setPortalContainer(document.body);
+          setMounted(true);
+        } else {
+          console.error('❌ document.body is null');
+        }
+      } else {
+        console.error('❌ document is undefined');
+      }
+    } catch (error) {
+      console.error('❌ Error in Layout Effect:', error);
+    }
+  }, []);
+
   useEffect(() => {
-    console.log('🔄 SocialProofToast mounted, active:', active);
+    console.log('🔄 [Effect 1] Main effect starting');
+    console.log('📊 Current state:', { mounted, visible, active, currentMessage });
     
+    if (!mounted) {
+      console.log('⏳ Component not yet mounted, waiting...');
+      return;
+    }
+
     if (!active) {
       console.log('❌ Component not active, returning');
       return;
     }
 
-    // Fonction pour générer un nouveau message
-    const generateMessage = () => {
-      const person = names[Math.floor(Math.random() * names.length)]
-      const city = cities[Math.floor(Math.random() * cities.length)]
-      const message = messages[person.gender][Math.floor(Math.random() * messages[person.gender].length)]
-      
-      console.log('📝 Generating new message:', { person, city, message });
-      
-      setCurrentMessage({
-        name: person.name,
-        gender: person.gender,
-        city,
-        message,
-        time: 'à l\'instant'
-      })
-      setVisible(true)
-    }
+    try {
+      // Fonction pour générer un nouveau message
+      const generateMessage = () => {
+        console.log('📝 Generating new message...');
+        try {
+          const person = names[Math.floor(Math.random() * names.length)]
+          const city = cities[Math.floor(Math.random() * cities.length)]
+          const message = messages[person.gender][Math.floor(Math.random() * messages[person.gender].length)]
+          
+          console.log('✨ Generated content:', { person, city, message });
+          
+          setCurrentMessage(prev => {
+            console.log('🔄 Updating message from:', prev);
+            const next = {
+              name: person.name,
+              gender: person.gender,
+              city,
+              message,
+              time: 'à l\'instant'
+            };
+            console.log('🔄 Updating message to:', next);
+            return next;
+          });
 
-    // Afficher un message toutes les 6-12 secondes
-    const interval = setInterval(() => {
-      generateMessage()
-      
-      // Cacher le message après 4 secondes
-      setTimeout(() => {
-        setVisible(false)
-      }, 4000)
-    }, Math.random() * (12000 - 6000) + 6000)
-
-    // Afficher le premier message après 2 secondes
-    const initialTimeout = setTimeout(() => {
-      generateMessage()
-      setTimeout(() => setVisible(false), 4000)
-    }, 2000)
-
-    // Si une durée est spécifiée, arrêter les notifications après cette durée
-    let durationTimeout: NodeJS.Timeout | undefined
-    if (duration) {
-      durationTimeout = setTimeout(() => {
-        setActive(false)
-      }, duration)
-    }
-
-    return () => {
-      clearInterval(interval)
-      clearTimeout(initialTimeout)
-      if (durationTimeout) {
-        clearTimeout(durationTimeout)
+          setVisible(true);
+          console.log('👁️ Visibility set to:', true);
+        } catch (error) {
+          console.error('❌ Error generating message:', error);
+        }
       }
+
+      console.log('⏰ Setting up intervals and timeouts');
+
+      // Générer le premier message immédiatement
+      console.log('1️⃣ Generating first message');
+      generateMessage();
+
+      // Configurer l'intervalle pour les messages suivants
+      const interval = setInterval(() => {
+        console.log('⏰ Interval triggered');
+        generateMessage();
+        
+        // Cacher après 4 secondes
+        setTimeout(() => {
+          console.log('🔄 Hide timeout triggered');
+          setVisible(false);
+        }, 4000);
+      }, 8000);
+
+      // Configurer le timeout de durée si spécifié
+      let durationTimeout: NodeJS.Timeout | undefined;
+      if (duration) {
+        console.log('⏱️ Setting duration timeout for:', duration, 'ms');
+        durationTimeout = setTimeout(() => {
+          console.log('⌛ Duration reached, deactivating');
+          setActive(false);
+        }, duration);
+      }
+
+      return () => {
+        console.log('🧹 Cleaning up effect');
+        clearInterval(interval);
+        if (durationTimeout) {
+          clearTimeout(durationTimeout);
+        }
+      }
+    } catch (error) {
+      console.error('❌ Error in main effect:', error);
     }
-  }, [active, duration])
+  }, [mounted, active, duration]);
 
-  if (!active) return null
+  // Log avant chaque rendu
+  console.log('📊 Pre-render state:', {
+    mounted,
+    portalContainer: !!portalContainer,
+    visible,
+    active,
+    currentMessage
+  });
 
-  return (
+  if (!mounted || !portalContainer) {
+    console.log('⏳ Waiting for mount and portal container');
+    return null;
+  }
+
+  if (!active) {
+    console.log('❌ Component not active, not rendering');
+    return null;
+  }
+
+  const toastContent = (
     <AnimatePresence>
       {visible && (
         <motion.div
@@ -163,10 +231,15 @@ export default function SocialProofToast({ duration }: SocialProofToastProps) {
           animate={{ opacity: 1, y: 0, x: 0 }}
           exit={{ opacity: 0, y: 50, x: 50 }}
           transition={{ type: "spring", stiffness: 300, damping: 30 }}
-          className="fixed bottom-4 right-4 bg-white rounded-lg shadow-xl p-4 max-w-sm z-50 border border-pink-100 transform hover:scale-105 transition-transform duration-200"
+          className="fixed bottom-4 right-4 bg-white rounded-lg shadow-xl p-4 max-w-sm z-[9999] border border-pink-100 transform hover:scale-105 transition-transform duration-200"
+          style={{ position: 'fixed', zIndex: 9999 }}
         >
           <div className="flex items-start gap-3">
-            <div className={`w-2 h-2 rounded-full mt-2 flex-shrink-0 ${currentMessage.gender === 'f' ? 'bg-pink-500' : 'bg-blue-500'}`} />
+            <div 
+              className={`w-2 h-2 rounded-full mt-2 flex-shrink-0 ${
+                currentMessage.gender === 'f' ? 'bg-pink-500' : 'bg-blue-500'
+              }`} 
+            />
             <div>
               <p className="text-gray-800">
                 <span className="font-semibold">{currentMessage.name}</span>{' '}
@@ -181,5 +254,8 @@ export default function SocialProofToast({ duration }: SocialProofToastProps) {
         </motion.div>
       )}
     </AnimatePresence>
-  )
+  );
+
+  console.log('🎨 [END] Rendering toast with portal');
+  return createPortal(toastContent, portalContainer);
 }

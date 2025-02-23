@@ -7,8 +7,11 @@ import FAQ from "@/components/FAQ";
 import TypeformButton from "@/components/TypeformButton";
 import OnboardingForm from "@/components/OnboardingForm";
 
-const Home: React.FC = () => {
+export default function Home() {
+  console.log('🏠 [START] Home Component Render');
+
   useEffect(() => {
+    console.log('🔄 Home component mounted');
     document.body.style.overflow = 'auto';
     document.body.style.overflowX = 'hidden';
     
@@ -31,6 +34,7 @@ const Home: React.FC = () => {
     });
 
     return () => {
+      console.log('🔚 Home component cleanup');
       observer.disconnect();
     };
   }, []);
@@ -450,6 +454,4 @@ const Home: React.FC = () => {
       </div>
     </>
   );
-};
-
-export default Home;
+}
