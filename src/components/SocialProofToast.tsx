@@ -174,9 +174,12 @@ export default function SocialProofToast({ duration = 60000 }: SocialProofToastP
 
       console.log('⏰ Setting up intervals and timeouts');
 
-      // Générer le premier message immédiatement
-      console.log('1️⃣ Generating first message');
-      generateMessage();
+      // Premier message après 2 secondes
+      console.log('1️⃣ Setting up first message timeout (2s)');
+      const initialTimeout = setTimeout(() => {
+        console.log('1️⃣ Generating first message');
+        generateMessage();
+      }, 2000);
 
       // Configurer l'intervalle pour les messages suivants (toutes les 10 secondes)
       const interval = setInterval(() => {
@@ -202,6 +205,7 @@ export default function SocialProofToast({ duration = 60000 }: SocialProofToastP
 
       return () => {
         console.log('🧹 Cleaning up effect');
+        clearTimeout(initialTimeout);
         clearInterval(interval);
         if (durationTimeout) {
           clearTimeout(durationTimeout);
