@@ -36,7 +36,9 @@ export default function Diagnostic() {
           data-tf-live="01JMSSF0NQQJNXEA92SRN8FT14"
           className="w-full h-screen"
         />
-        <SocialProofToast duration={15000} />
+        <div className="w-full h-full">
+          <SocialProofToast />
+        </div>
       </div>
     </>
   )

@@ -2,8 +2,27 @@ import { useEffect, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { createPortal } from 'react-dom'
 
+type Gender = 'f' | 'm';
+
+interface Person {
+  name: string;
+  gender: Gender;
+}
+
+interface ToastMessage {
+  name: string;
+  gender: Gender;
+  city: string;
+  message: string;
+  time: string;
+}
+
+interface SocialProofToastProps {
+  duration?: number;
+}
+
 // Noms arabes/musulmans
-const names = [
+const names: Person[] = [
   // Femmes
   { name: 'Sarah', gender: 'f' },
   { name: 'Fatima', gender: 'f' },
@@ -44,7 +63,7 @@ const cities = [
   'Orléans', 'Angers', 'Mulhouse', 'Reims', 'Avignon', 'Metz', 'Perpignan'
 ]
 
-const messages = {
+const messages: Record<Gender, string[]> = {
   f: [
     'vient de commencer son diagnostic',
     'a rempli son formulaire',
@@ -63,11 +82,11 @@ const messages = {
   ]
 }
 
-export default function SocialProofToast() {
+export default function SocialProofToast({ duration = 60000 }: SocialProofToastProps) {
   const [visible, setVisible] = useState(false)
-  const [currentMessage, setCurrentMessage] = useState({
+  const [currentMessage, setCurrentMessage] = useState<ToastMessage>({
     name: '',
-    gender: 'f' as 'f' | 'm',
+    gender: 'f',
     city: '',
     message: '',
     time: 'à l\'instant'
@@ -90,27 +109,30 @@ export default function SocialProofToast() {
       setVisible(true)
     }
 
-    // Afficher un message toutes les 6-12 secondes
-    const interval = setInterval(() => {
-      generateMessage()
-      
-      // Cacher le message après 4 secondes
-      setTimeout(() => {
-        setVisible(false)
-      }, 4000)
-    }, Math.random() * (12000 - 6000) + 6000)
-
-    // Afficher le premier message après 2 secondes
+    // Premier message après 2 secondes
     const initialTimeout = setTimeout(() => {
       generateMessage()
       setTimeout(() => setVisible(false), 4000)
     }, 2000)
 
-    return () => {
+    // Messages suivants toutes les 10 secondes
+    const interval = setInterval(() => {
+      generateMessage()
+      setTimeout(() => setVisible(false), 4000)
+    }, 10000)
+
+    // Nettoyer après la durée spécifiée
+    const durationTimeout = setTimeout(() => {
       clearInterval(interval)
       clearTimeout(initialTimeout)
+    }, duration)
+
+    return () => {
+      clearTimeout(initialTimeout)
+      clearInterval(interval)
+      clearTimeout(durationTimeout)
     }
-  }, [])
+  }, [duration])
 
   const toastContent = (
     <AnimatePresence>
