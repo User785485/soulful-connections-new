@@ -1,6 +1,7 @@
 import { useEffect } from 'react'
 import { Helmet } from 'react-helmet'
 import TopBanner from '@/components/TopBanner'
+import SocialProofToast from '@/components/SocialProofToast'
 
 export default function Diagnostic() {
   useEffect(() => {
@@ -35,6 +36,7 @@ export default function Diagnostic() {
           data-tf-live="01JMSSF0NQQJNXEA92SRN8FT14"
           className="w-full h-screen"
         />
+        <SocialProofToast duration={15000} />
       </div>
     </>
   )
