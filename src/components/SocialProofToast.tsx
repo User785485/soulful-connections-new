@@ -82,7 +82,7 @@ interface SocialProofToastProps {
   duration?: number // Durée en millisecondes
 }
 
-export default function SocialProofToast({ duration }: SocialProofToastProps) {
+export default function SocialProofToast({ duration = 60000 }: SocialProofToastProps) {
   console.log('🎨 [START] SocialProofToast Component Render');
   console.log('📌 Props received:', { duration });
 
@@ -97,6 +97,14 @@ export default function SocialProofToast({ duration }: SocialProofToastProps) {
     message: '',
     time: 'à l\'instant'
   })
+
+  // Réinitialiser l'état actif quand le composant est monté
+  useEffect(() => {
+    if (mounted) {
+      console.log('🔄 Resetting active state on mount');
+      setActive(true);
+    }
+  }, [mounted]);
 
   // Vérifier que document.body existe avant de créer le portail
   useLayoutEffect(() => {
@@ -170,19 +178,19 @@ export default function SocialProofToast({ duration }: SocialProofToastProps) {
       console.log('1️⃣ Generating first message');
       generateMessage();
 
-      // Configurer l'intervalle pour les messages suivants
+      // Configurer l'intervalle pour les messages suivants (toutes les 10 secondes)
       const interval = setInterval(() => {
         console.log('⏰ Interval triggered');
         generateMessage();
         
-        // Cacher après 4 secondes
+        // Cacher après 6 secondes
         setTimeout(() => {
           console.log('🔄 Hide timeout triggered');
           setVisible(false);
-        }, 4000);
-      }, 8000);
+        }, 6000);
+      }, 10000);
 
-      // Configurer le timeout de durée si spécifié
+      // Si une durée est spécifiée, arrêter les notifications après cette durée
       let durationTimeout: NodeJS.Timeout | undefined;
       if (duration) {
         console.log('⏱️ Setting duration timeout for:', duration, 'ms');
