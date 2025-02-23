@@ -82,6 +82,8 @@ interface SocialProofToastProps {
 }
 
 export default function SocialProofToast({ duration }: SocialProofToastProps) {
+  console.log('🎨 Rendering SocialProofToast, duration:', duration);
+  
   const [visible, setVisible] = useState(false)
   const [active, setActive] = useState(true)
   const [currentMessage, setCurrentMessage] = useState<ToastMessage>({
@@ -93,13 +95,20 @@ export default function SocialProofToast({ duration }: SocialProofToastProps) {
   })
 
   useEffect(() => {
-    if (!active) return
+    console.log('🔄 SocialProofToast mounted, active:', active);
+    
+    if (!active) {
+      console.log('❌ Component not active, returning');
+      return;
+    }
 
     // Fonction pour générer un nouveau message
     const generateMessage = () => {
       const person = names[Math.floor(Math.random() * names.length)]
       const city = cities[Math.floor(Math.random() * cities.length)]
       const message = messages[person.gender][Math.floor(Math.random() * messages[person.gender].length)]
+      
+      console.log('📝 Generating new message:', { person, city, message });
       
       setCurrentMessage({
         name: person.name,
