@@ -26,29 +26,15 @@ export default function Diagnostic() {
           name="description"
           content="Commencez votre diagnostic gratuit avec My Muqabala et trouvez l'amour selon vos valeurs."
         />
-        <script src="https://embed.typeform.com/next/embed.js" async></script>
+        <script src="//embed.typeform.com/next/embed.js" async></script>
       </Helmet>
 
-      <div className="min-h-screen flex flex-col">
-        <div className="flex-none">
-          <TopBanner />
-        </div>
-
-        <div className="flex-grow relative min-h-[600px]">
-          <div 
-            data-tf-live="01JKRM7WQYBPKGV1BPC0JC1CT6"
-            data-tf-opacity="100"
-            data-tf-inline-on-mobile="true"
-            data-tf-hide-headers="true"
-            data-tf-hide-footer="true"
-            className="absolute inset-0 z-10"
-            style={{ 
-              width: '100%',
-              height: '100%',
-              minHeight: '600px'
-            }}
-          />
-        </div>
+      <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
+        <TopBanner />
+        <div 
+          data-tf-live="01JMSSF0NQQJNXEA92SRN8FT14"
+          className="w-full h-screen"
+        />
       </div>
     </>
   )
