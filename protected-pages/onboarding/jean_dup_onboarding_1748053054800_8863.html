@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Accès Protégé - Jean</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .login-container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 400px;
+            width: 100%;
+            text-align: center;
+            backdrop-filter: blur(10px);
+            transition: transform 0.3s ease;
+        }
+        
+        .login-container:hover {
+            transform: translateY(-5px);
+        }
+        
+        .lock-icon {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 30px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+            color: white;
+        }
+        
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 28px;
+        }
+        
+        .client-name {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 18px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            color: #555;
+            margin-bottom: 10px;
+            font-weight: 500;
+        }
+        
+        input[type="password"] {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            background: #f8f8f8;
+        }
+        
+        input[type="password"]:focus {
+            outline: none;
+            border-color: #667eea;
+            background: white;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.2);
+        }
+        
+        button {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 10px;
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+        }
+        
+        button:active {
+            transform: translateY(0);
+        }
+        
+        .error-message {
+            color: #e74c3c;
+            margin-top: 15px;
+            padding: 10px;
+            background: #fee;
+            border-radius: 8px;
+            display: none;
+            animation: shake 0.5s ease-in-out;
+        }
+        
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
+        }
+        
+        .loading {
+            display: none;
+            margin-top: 15px;
+            color: #666;
+        }
+        
+        .spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-right: 10px;
+            vertical-align: middle;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        #protected-content {
+            display: none;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .content-visible {
+            animation: fadeIn 0.5s ease-in-out;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container" id="login-form">
+        <div class="lock-icon">🔒</div>
+        <h1>Accès Protégé</h1>
+        <p class="client-name">Page personnalisée pour Jean</p>
+        
+        <form onsubmit="checkPassword(event)">
+            <div class="form-group">
+                <label for="password">Code d'accès</label>
+                <input type="password" id="password" placeholder="Entrez le code d'accès" required autofocus>
+            </div>
+            <button type="submit">Accéder à la page</button>
+        </form>
+        
+        <div class="error-message" id="error-message">
+            Code d'accès incorrect. Veuillez réessayer.
+        </div>
+        
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            Vérification en cours...
+        </div>
+    </div>
+    
+    <div id="protected-content"></div>
+    
+    <script>
+        // Code d'accès
+        const correctCode = '7744';
+        
+        // Contenu encodé en base64
+        const encodedContent = 'PCFET0NUWVBFIGh0bWw+CjxodG1sIGxhbmc9ImZyIj4KPGhlYWQ+CiAgICA8bWV0YSBjaGFyc2V0PSJVVEYtOCI+CiAgICA8bWV0YSBuYW1lPSJ2aWV3cG9ydCIgY29udGVudD0id2lkdGg9ZGV2aWNlLXdpZHRoLCBpbml0aWFsLXNjYWxlPTEuMCI+CiAgICA8dGl0bGU+R3VpZGUgZCdvbmJvYXJkaW5nIHBvdXIgSmVhbiBEdXBvbnQ8L3RpdGxlPgogICAgPHN0eWxlPgogICAgICAgIC8qIFN0eWxlcyBkZSBiYXNlICovCiAgICAgICAgYm9keSwgaHRtbCB7CiAgICAgICAgICAgIG1hcmdpbjogMDsKICAgICAgICAgICAgcGFkZGluZzogMDsKICAgICAgICAgICAgZm9udC1mYW1pbHk6ICdTZWdvZSBVSScsIFRhaG9tYSwgR2VuZXZhLCBWZXJkYW5hLCBzYW5zLXNlcmlmOwogICAgICAgICAgICBsaW5lLWhlaWdodDogMS42OwogICAgICAgICAgICBjb2xvcjogIzMzMzsKICAgICAgICAgICAgYmFja2dyb3VuZC1jb2xvcjogI2Y4ZmFmYzsKICAgICAgICB9CiAgICAgICAgCiAgICAgICAgLyogRW4tdHUwMGVhdGUgKi8KICAgICAgICBoZWFkZXIgewogICAgICAgICAgICBiYWNrZ3JvdW5kOiBsaW5lYXItZ3JhZGllbnQoMTM1ZGVnLCAjMTBiOTgxIDAlLCAjMDU5NjY5IDEwMCUpOwogICAgICAgICAgICBjb2xvcjogd2hpdGU7CiAgICAgICAgICAgIHBhZGRpbmc6IDMwcHggMjBweDsKICAgICAgICAgICAgdGV4dC1hbGlnbjogY2VudGVyOwogICAgICAgIH0KICAgICAgICAKICAgICAgICBoZWFkZXIgaDEgewogICAgICAgICAgICBtYXJnaW46IDA7CiAgICAgICAgICAgIGZvbnQtc2l6ZTogMi4ycmVtOwogICAgICAgICAgICBsZXR0ZXItc3BhY2luZzogLTAuNXB4OwogICAgICAgIH0KICAgICAgICAKICAgICAgICBoZWFkZXIgcCB7CiAgICAgICAgICAgIG1hcmdpbjogMTBweCAwIDA7CiAgICAgICAgICAgIGZvbnQtc2l6ZTogMS4xcmVtOwogICAgICAgICAgICBvcGFjaXR5OiAwLjk7CiAgICAgICAgfQogICAgICAgIAogICAgICAgIC8qIENvbnRlbnUgcHJpbmNpcGFsICovCiAgICAgICAgbWFpbiB7CiAgICAgICAgICAgIG1heC13aWR0aDogODAwcHg7CiAgICAgICAgICAgIG1hcmdpbjogMCBhdXRvOwogICAgICAgICAgICBwYWRkaW5nOiA0MHB4IDIwcHg7CiAgICAgICAgfQogICAgICAgIAogICAgICAgIHNlY3Rpb24gewogICAgICAgICAgICBtYXJnaW4tYm90dG9tOiA0MHB4OwogICAgICAgICAgICBiYWNrZ3JvdW5kOiB3aGl0ZTsKICAgICAgICAgICAgYm9yZGVyLXJhZGl1czogOHB4OwogICAgICAgICAgICBib3gtc2hhZG93OiAwIDVweCAxNXB4IHJnYmEoMCwgMCwgMCwgMC4wNSk7CiAgICAgICAgICAgIHBhZGRpbmc6IDI1cHg7CiAgICAgICAgfQogICAgICAgIAogICAgICAgIGgyIHsKICAgICAgICAgICAgY29sb3I6ICMwNTk2Njk7CiAgICAgICAgICAgIG1hcmdpbi10b3A6IDA7CiAgICAgICAgICAgIGZvbnQtc2l6ZTogMS42cmVtOwogICAgICAgICAgICBib3JkZXItYm90dG9tOiAycHggc29saWQgI2QxZmFlNTsKICAgICAgICAgICAgcGFkZGluZy1ib3R0b206IDEwcHg7CiAgICAgICAgfQogICAgICAgIAogICAgICAgIGgzIHsKICAgICAgICAgICAgY29sb3I6ICMwNDc4NTc7CiAgICAgICAgICAgIGZvbnQtc2l6ZTogMS4zcmVtOwogICAgICAgICAgICBtYXJnaW46IDI1cHggMCAxNXB4OwogICAgICAgIH0KICAgICAgICAKICAgICAgICBwIHsKICAgICAgICAgICAgbWFyZ2luOiAxNXB4IDA7CiAgICAgICAgICAgIGNvbG9yOiAjMzM0MTU1OwogICAgICAgIH0KICAgICAgICAKICAgICAgICAvKiBMaXN0ZSAqLwogICAgICAgIHVsLCBvbCB7CiAgICAgICAgICAgIHBhZGRpbmctbGVmdDogMjVweDsKICAgICAgICB9CiAgICAgICAgCiAgICAgICAgbGkgewogICAgICAgICAgICBtYXJnaW4tYm90dG9tOiAxMHB4OwogICAgICAgICAgICBjb2xvcjogIzMzNDE1NTsKICAgICAgICB9CiAgICAgICAgCiAgICAgICAgLyogdTAwYzl0YXBlcyAqLwogICAgICAgIC5zdGVwIHsKICAgICAgICAgICAgZGlzcGxheTogZmxleDsKICAgICAgICAgICAgbWFyZ2luLWJvdHRvbTogMjBweDsKICAgICAgICAgICAgYm9yZGVyLWxlZnQ6IDNweCBzb2xpZCAjMTBiOTgxOwogICAgICAgICAgICBwYWRkaW5nLWxlZnQ6IDIwcHg7CiAgICAgICAgfQogICAgICAgIAogICAgICAgIC5zdGVwLW51bWJlciB7CiAgICAgICAgICAgIGJhY2tncm91bmQtY29sb3I6ICMxMGI5ODE7CiAgICAgICAgICAgIGNvbG9yOiB3aGl0ZTsKICAgICAgICAgICAgd2lkdGg6IDMwcHg7CiAgICAgICAgICAgIGhlaWdodDogMzBweDsKICAgICAgICAgICAgYm9yZGVyLXJhZGl1czogNTAlOwogICAgICAgICAgICBkaXNwbGF5OiBmbGV4OwogICAgICAgICAgICBhbGlnbi1pdGVtczogY2VudGVyOwogICAgICAgICAgICBqdXN0aWZ5LWNvbnRlbnQ6IGNlbnRlcjsKICAgICAgICAgICAgZm9udC13ZWlnaHQ6IGJvbGQ7CiAgICAgICAgICAgIGZsZXgtc2hyaW5rOiAwOwogICAgICAgICAgICBtYXJnaW4tcmlnaHQ6IDE1cHg7CiAgICAgICAgICAgIG1hcmdpbi10b3A6IDJweDsKICAgICAgICB9CiAgICAgICAgCiAgICAgICAgLnN0ZXAtY29udGVudCB7CiAgICAgICAgICAgIGZsZXgtZ3JvdzogMTsKICAgICAgICB9CiAgICAgICAgCiAgICAgICAgLnN0ZXAtY29udGVudCBoNCB7CiAgICAgICAgICAgIG1hcmdpbjogMCAwIDEwcHg7CiAgICAgICAgICAgIGNvbG9yOiAjMDQ3ODU3OwogICAgICAgIH0KICAgICAgICAKICAgICAgICAvKiBOb3RlcyAqLwogICAgICAgIC5pbXBvcnRhbnQtbm90ZSB7CiAgICAgICAgICAgIGJhY2tncm91bmQtY29sb3I6ICNlY2ZkZjU7CiAgICAgICAgICAgIGJvcmRlci1sZWZ0OiA0cHggc29saWQgIzEwYjk4MTsKICAgICAgICAgICAgcGFkZGluZzogMTVweDsKICAgICAgICAgICAgbWFyZ2luOiAyMHB4IDA7CiAgICAgICAgICAgIGJvcmRlci1yYWRpdXM6IDAgOHB4IDhweCAwOwogICAgICAgIH0KICAgICAgICAKICAgICAgICAvKiBDYXJ0ZSAqLwogICAgICAgIC5zdWNjZXNzLWNhcmQgewogICAgICAgICAgICBiYWNrZ3JvdW5kLWNvbG9yOiAjZjBmZGY0OwogICAgICAgICAgICBib3JkZXItcmFkaXVzOiA4cHg7CiAgICAgICAgICAgIHBhZGRpbmc6IDIwcHg7CiAgICAgICAgICAgIG1hcmdpbi10b3A6IDIwcHg7CiAgICAgICAgICAgIHRleHQtYWxpZ246IGNlbnRlcjsKICAgICAgICB9CiAgICAgICAgCiAgICAgICAgLnN1Y2Nlc3MtY2FyZCBoMyB7CiAgICAgICAgICAgIGNvbG9yOiAjMTY2NTM0OwogICAgICAgICAgICBtYXJnaW4tdG9wOiAwOwogICAgICAgIH0KICAgICAgICAKICAgICAgICAvKiBQaWVkIGRlIHBhZ2UgKi8KICAgICAgICBmb290ZXIgewogICAgICAgICAgICBiYWNrZ3JvdW5kLWNvbG9yOiAjZjFmNWY5OwogICAgICAgICAgICB0ZXh0LWFsaWduOiBjZW50ZXI7CiAgICAgICAgICAgIHBhZGRpbmc6IDIwcHg7CiAgICAgICAgICAgIG1hcmdpbi10b3A6IDQwcHg7CiAgICAgICAgICAgIGNvbG9yOiAjNjQ3NDhiOwogICAgICAgICAgICBmb250LXNpemU6IDAuOXJlbTsKICAgICAgICB9CiAgICAgICAgCiAgICAgICAgLyogUmVzcG9uc2l2ZSAqLwogICAgICAgIEBtZWRpYSAobWF4LXdpZHRoOiA3NjhweCkgewogICAgICAgICAgICBoZWFkZXIgaDEgewogICAgICAgICAgICAgICAgZm9udC1zaXplOiAxLjhyZW07CiAgICAgICAgICAgIH0KICAgICAgICAgICAgCiAgICAgICAgICAgIG1haW4gewogICAgICAgICAgICAgICAgcGFkZGluZzogMjBweDsKICAgICAgICAgICAgfQogICAgICAgIH0KICAgIDwvc3R5bGU+CjwvaGVhZD4KPGJvZHk+CiAgICA8aGVhZGVyPgogICAgICAgIDxoMT5HdWlkZSBkZSBEw6ltYXJyYWdlPC9oMT4KICAgICAgICA8cD5KZWFuIER1cG9udCB8IETDqWJ1dCBsZSAwMS8wMi8yMDI1PC9wPgogICAgPC9oZWFkZXI+CiAgICAKICAgIDxtYWluPgogICAgICAgIDxzZWN0aW9uPgogICAgICAgICAgICA8aDI+QmllbnZlbnVlIGRhbnMgdm90cmUgcHJvZ3JhbW1lICE8L2gyPgogICAgICAgICAgICA8cD5Cb25qb3VyIEplYW4sPC9wPgogICAgICAgICAgICA8cD5Gw6lsaWNpdGF0aW9ucyBwb3VyIHZvdHJlIGluc2NyaXB0aW9uIMOgIDxzdHJvbmc+e3tQUk9EVUlUfX08L3N0cm9uZz4gISBDZSBndWlkZSB2b3VzIGFpZGVyYSDDoCBiaWVuIGTDqW1hcnJlciBldCDDoCB0aXJlciBsZSBtZWlsbGV1ciBwYXJ0aSBkZSB2b3RyZSBleHDDqXJpZW5jZS48L3A+CiAgICAgICAgICAgIAogICAgICAgICAgICA8ZGl2IGNsYXNzPSJpbXBvcnRhbnQtbm90ZSI+CiAgICAgICAgICAgICAgICA8cD48c3Ryb25nPkltcG9ydGFudCA6PC9zdHJvbmc+IFZvdHJlIHByb2dyYW1tZSBjb21tZW5jZSBvZmZpY2llbGxlbWVudCBsZSA8c3Ryb25nPjAxLzAyLzIwMjU8L3N0cm9uZz4uIEFzc3VyZXotdm91cyBkJ8OqdHJlIGRpc3BvbmlibGUgZXQgcHLDqnQoZSkgcG91ciBjZXR0ZSBkYXRlLjwvcD4KICAgICAgICAgICAgPC9kaXY+CiAgICAgICAgPC9zZWN0aW9uPgogICAgICAgIAogICAgICAgIDxzZWN0aW9uPgogICAgICAgICAgICA8aDI+TGVzIMOpdGFwZXMgZGUgdm90cmUgb25ib2FyZGluZzwvaDI+CiAgICAgICAgICAgIDxwPlZvaWNpIGxlcyDDqXRhcGVzIHF1ZSBub3VzIHN1aXZyb25zIGVuc2VtYmxlIHBvdXIgYXNzdXJlciB2b3RyZSBzdWNjw6hzIDo8L3A+CiAgICAgICAgICAgIAogICAgICAgICAgICA8ZGl2IGNsYXNzPSJzdGVwcyI+CiAgICAgICAgICAgICAgICAxLiBJbnN0YWxsYXRpb24gZGVzIG91dGlsczxicj4yLiBNb2R1bGUgZMOpYnV0YW50PGJyPjMuIE1vZHVsZSBhdmFuY8OpPGJyPjQuIFByb2pldCBmaW5hbAogICAgICAgICAgICA8L2Rpdj4KICAgICAgICA8L3NlY3Rpb24+CiAgICAgICAgCiAgICAgICAgPHNlY3Rpb24+CiAgICAgICAgICAgIDxoMj5Db25zZWlscyBwb3VyIHLDqXVzc2lyPC9oMj4KICAgICAgICAgICAgPHA+Vm9pY2kgcXVlbHF1ZXMgY29uc2VpbHMgcG91ciBtYXhpbWlzZXIgdm90cmUgZXhww6lyaWVuY2UgZXQgYXR0ZWluZHJlIHZvcyBvYmplY3RpZnMgcGx1cyByYXBpZGVtZW50IDo8L3A+CiAgICAgICAgICAgIAogICAgICAgICAgICA8ZGl2IGNsYXNzPSJ0aXBzIj4KICAgICAgICAgICAgICAgIFLDqXNlcnZlciAzMCBtaW4vam91cjxicj5DcsOpZXIgdW4gZmljaGllciBkZSBwcmF0aXF1ZTxicj5Ob3RlciB2b3MgcXVlc3Rpb25zCiAgICAgICAgICAgIDwvZGl2PgogICAgICAgICAgICAKICAgICAgICAgICAgPGRpdiBjbGFzcz0ic3VjY2Vzcy1jYXJkIj4KICAgICAgICAgICAgICAgIDxoMz5Ob3RyZSBlbmdhZ2VtZW50IGVudmVycyB2b3RyZSBzdWNjw6hzPC9oMz4KICAgICAgICAgICAgICAgIDxwPk5vdXMgc29tbWVzIHRvdGFsZW1lbnQgZW5nYWfDqXMgcG91ciB2b3VzIGFpZGVyIMOgIGF0dGVpbmRyZSB2b3Mgb2JqZWN0aWZzIDogPHN0cm9uZz57e09CSkVDVElGU319PC9zdHJvbmc+LjwvcD4KICAgICAgICAgICAgICAgIDxwPk4naMOpc2l0ZXogamFtYWlzIMOgIG5vdXMgY29udGFjdGVyIHNpIHZvdXMgYXZleiBkZXMgcXVlc3Rpb25zLjwvcD4KICAgICAgICAgICAgPC9kaXY+CiAgICAgICAgPC9zZWN0aW9uPgogICAgICAgIAogICAgICAgIDxzZWN0aW9uPgogICAgICAgICAgICA8aDI+Q29tbWVudCBub3VzIGNvbnRhY3RlcjwvaDI+CiAgICAgICAgICAgIDxwPlNpIHZvdXMgYXZleiBkZXMgcXVlc3Rpb25zIG91IGJlc29pbiBkJ2Fzc2lzdGFuY2UgOjwvcD4KICAgICAgICAgICAgCiAgICAgICAgICAgIDx1bD4KICAgICAgICAgICAgICAgIDxsaT48c3Ryb25nPlBhciBXaGF0c0FwcCA6PC9zdHJvbmc+IHt7TlVNRVJPX1dIQVRTQVBQfX08L2xpPgogICAgICAgICAgICAgICAgPGxpPjxzdHJvbmc+UGFyIGVtYWlsIDo8L3N0cm9uZz4gc3VwcG9ydEBleGFtcGxlLmNvbTwvbGk+CiAgICAgICAgICAgICAgICA8bGk+PHN0cm9uZz5QYXIgdMOpbMOpcGhvbmUgOjwvc3Ryb25nPiArMzM2MTIzNDU2Nzg8L2xpPgogICAgICAgICAgICA8L3VsPgogICAgICAgICAgICAKICAgICAgICAgICAgPHA+Tm90cmUgw6lxdWlwZSBlc3QgZGlzcG9uaWJsZSBkdSBsdW5kaSBhdSB2ZW5kcmVkaSwgZGUgOWggw6AgMThoLjwvcD4KICAgICAgICA8L3NlY3Rpb24+CiAgICA8L21haW4+CiAgICAKICAgIDxmb290ZXI+CiAgICAgICAgPHA+Q2UgZ3VpZGUgZCdvbmJvYXJkaW5nIGVzdCBwZXJzb25uYWxpc8OpIHBvdXIgSmVhbiBEdXBvbnQ8L3A+CiAgICAgICAgPHA+R8OpbsOpcsOpIGxlIDI0LzA1LzIwMjU8L3A+CiAgICA8L2Zvb3Rlcj4KPC9ib2R5Pgo8L2h0bWw+Cg==';
+        
+        function checkPassword(event) {
+            event.preventDefault();
+            
+            const password = document.getElementById('password').value;
+            const errorMessage = document.getElementById('error-message');
+            const loading = document.getElementById('loading');
+            const loginForm = document.getElementById('login-form');
+            const protectedContent = document.getElementById('protected-content');
+            
+            // Afficher le chargement
+            loading.style.display = 'block';
+            errorMessage.style.display = 'none';
+            
+            // Simuler une vérification (pour l'UX)
+            setTimeout(() => {
+                loading.style.display = 'none';
+                
+                if (password === correctCode) {
+                    // Accès autorisé
+                    loginForm.style.display = 'none';
+                    
+                    // Décoder et afficher le contenu
+                    const decodedContent = atob(encodedContent);
+                    protectedContent.innerHTML = decodedContent;
+                    protectedContent.style.display = 'block';
+                    protectedContent.classList.add('content-visible');
+                    
+                    // Sauvegarder dans sessionStorage
+                    sessionStorage.setItem('soulful_access_' + window.location.pathname, 'granted');
+                } else {
+                    // Accès refusé
+                    errorMessage.style.display = 'block';
+                    document.getElementById('password').value = '';
+                    document.getElementById('password').focus();
+                }
+            }, 500);
+        }
+        
+        // Vérifier si l'utilisateur a déjà accès
+        window.onload = function() {
+            if (sessionStorage.getItem('soulful_access_' + window.location.pathname) === 'granted') {
+                document.getElementById('login-form').style.display = 'none';
+                const protectedContent = document.getElementById('protected-content');
+                const decodedContent = atob(encodedContent);
+                protectedContent.innerHTML = decodedContent;
+                protectedContent.style.display = 'block';
+            }
+        };
+    </script>
+</body>
+</html>
