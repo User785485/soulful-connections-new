@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Accès Protégé - Marie</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .login-container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 400px;
+            width: 100%;
+            text-align: center;
+            backdrop-filter: blur(10px);
+            transition: transform 0.3s ease;
+        }
+        
+        .login-container:hover {
+            transform: translateY(-5px);
+        }
+        
+        .lock-icon {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 30px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+            color: white;
+        }
+        
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 28px;
+        }
+        
+        .client-name {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 18px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            color: #555;
+            margin-bottom: 10px;
+            font-weight: 500;
+        }
+        
+        input[type="password"] {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            background: #f8f8f8;
+        }
+        
+        input[type="password"]:focus {
+            outline: none;
+            border-color: #667eea;
+            background: white;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.2);
+        }
+        
+        button {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 10px;
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+        }
+        
+        button:active {
+            transform: translateY(0);
+        }
+        
+        .error-message {
+            color: #e74c3c;
+            margin-top: 15px;
+            padding: 10px;
+            background: #fee;
+            border-radius: 8px;
+            display: none;
+            animation: shake 0.5s ease-in-out;
+        }
+        
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
+        }
+        
+        .loading {
+            display: none;
+            margin-top: 15px;
+            color: #666;
+        }
+        
+        .spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-right: 10px;
+            vertical-align: middle;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        #protected-content {
+            display: none;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .content-visible {
+            animation: fadeIn 0.5s ease-in-out;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container" id="login-form">
+        <div class="lock-icon">🔒</div>
+        <h1>Accès Protégé</h1>
+        <p class="client-name">Page personnalisée pour Marie</p>
+        
+        <form onsubmit="checkPassword(event)">
+            <div class="form-group">
+                <label for="password">Code d'accès</label>
+                <input type="password" id="password" placeholder="Entrez le code d'accès" required autofocus>
+            </div>
+            <button type="submit">Accéder à la page</button>
+        </form>
+        
+        <div class="error-message" id="error-message">
+            Code d'accès incorrect. Veuillez réessayer.
+        </div>
+        
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            Vérification en cours...
+        </div>
+    </div>
+    
+    <div id="protected-content"></div>
+    
+    <script>
+        // Code d'accès
+        const correctCode = '7744';
+        
+        // Contenu encodé en base64
+        const encodedContent = 'PCFET0NUWVBFIGh0bWw+CjxodG1sIGxhbmc9ImZyIj4KPGhlYWQ+CiAgICA8bWV0YSBjaGFyc2V0PSJVVEYtOCI+CiAgICA8bWV0YSBuYW1lPSJ2aWV3cG9ydCIgY29udGVudD0id2lkdGg9ZGV2aWNlLXdpZHRoLCBpbml0aWFsLXNjYWxlPTEuMCI+CiAgICA8dGl0bGU+T2ZmcmUgU3B1MDBlOWNpYWxlIHBvdXIgTWFyaWUgTWFydGluPC90aXRsZT4KICAgIDxzdHlsZT4KICAgICAgICAvKiBTdHlsZXMgZGUgYmFzZSAqLwogICAgICAgIGJvZHksIGh0bWwgewogICAgICAgICAgICBtYXJnaW46IDA7CiAgICAgICAgICAgIHBhZGRpbmc6IDA7CiAgICAgICAgICAgIGZvbnQtZmFtaWx5OiAnU2Vnb2UgVUknLCBUYWhvbWEsIEdlbmV2YSwgVmVyZGFuYSwgc2Fucy1zZXJpZjsKICAgICAgICAgICAgbGluZS1oZWlnaHQ6IDEuNjsKICAgICAgICAgICAgY29sb3I6ICMzMzM7CiAgICAgICAgICAgIGJhY2tncm91bmQtY29sb3I6ICNmOGY5ZmM7CiAgICAgICAgfQogICAgICAgIAogICAgICAgIC8qIEVuLXR1MDBlYXRlICovCiAgICAgICAgaGVhZGVyIHsKICAgICAgICAgICAgYmFja2dyb3VuZDogbGluZWFyLWdyYWRpZW50KDEzNWRlZywgIzYzNjZmMSAwJSwgIzRmNDZlNSAxMDAlKTsKICAgICAgICAgICAgY29sb3I6IHdoaXRlOwogICAgICAgICAgICBwYWRkaW5nOiAzMHB4IDIwcHg7CiAgICAgICAgICAgIHRleHQtYWxpZ246IGNlbnRlcjsKICAgICAgICB9CiAgICAgICAgCiAgICAgICAgaGVhZGVyIGgxIHsKICAgICAgICAgICAgbWFyZ2luOiAwOwogICAgICAgICAgICBmb250LXNpemU6IDIuNXJlbTsKICAgICAgICAgICAgbGV0dGVyLXNwYWNpbmc6IC0wLjVweDsKICAgICAgICB9CiAgICAgICAgCiAgICAgICAgaGVhZGVyIHAgewogICAgICAgICAgICBtYXJnaW46IDEwcHggMCAwOwogICAgICAgICAgICBmb250LXNpemU6IDEuMnJlbTsKICAgICAgICAgICAgb3BhY2l0eTogMC45OwogICAgICAgIH0KICAgICAgICAKICAgICAgICAvKiBDb250ZW51IHByaW5jaXBhbCAqLwogICAgICAgIG1haW4gewogICAgICAgICAgICBtYXgtd2lkdGg6IDEwMDBweDsKICAgICAgICAgICAgbWFyZ2luOiAwIGF1dG87CiAgICAgICAgICAgIHBhZGRpbmc6IDQwcHggMjBweDsKICAgICAgICB9CiAgICAgICAgCiAgICAgICAgc2VjdGlvbiB7CiAgICAgICAgICAgIG1hcmdpbi1ib3R0b206IDQwcHg7CiAgICAgICAgICAgIGJhY2tncm91bmQ6IHdoaXRlOwogICAgICAgICAgICBib3JkZXItcmFkaXVzOiA4cHg7CiAgICAgICAgICAgIGJveC1zaGFkb3c6IDAgNXB4IDIwcHggcmdiYSgwLCAwLCAwLCAwLjA1KTsKICAgICAgICAgICAgcGFkZGluZzogMzBweDsKICAgICAgICB9CiAgICAgICAgCiAgICAgICAgaDIgewogICAgICAgICAgICBjb2xvcjogIzRmNDZlNTsKICAgICAgICAgICAgbWFyZ2luLXRvcDogMDsKICAgICAgICAgICAgZm9udC1zaXplOiAxLjhyZW07CiAgICAgICAgfQogICAgICAgIAogICAgICAgIGgzIHsKICAgICAgICAgICAgY29sb3I6ICM0MzM4Y2E7CiAgICAgICAgICAgIGZvbnQtc2l6ZTogMS40cmVtOwogICAgICAgICAgICBtYXJnaW46IDI1cHggMCAxNXB4OwogICAgICAgIH0KICAgICAgICAKICAgICAgICBwIHsKICAgICAgICAgICAgbWFyZ2luOiAxNXB4IDA7CiAgICAgICAgfQogICAgICAgIAogICAgICAgIC8qIEF2YW50YWdlcyAqLwogICAgICAgIC5iZW5lZml0cyB7CiAgICAgICAgICAgIGRpc3BsYXk6IGdyaWQ7CiAgICAgICAgICAgIGdyaWQtdGVtcGxhdGUtY29sdW1uczogcmVwZWF0KGF1dG8tZmlsbCwgbWlubWF4KDI4MHB4LCAxZnIpKTsKICAgICAgICAgICAgZ2FwOiAyMHB4OwogICAgICAgICAgICBtYXJnaW46IDMwcHggMDsKICAgICAgICB9CiAgICAgICAgCiAgICAgICAgLmJlbmVmaXQtY2FyZCB7CiAgICAgICAgICAgIGJhY2tncm91bmQ6ICNmM2Y0ZjY7CiAgICAgICAgICAgIGJvcmRlci1yYWRpdXM6IDhweDsKICAgICAgICAgICAgcGFkZGluZzogMjBweDsKICAgICAgICAgICAgdHJhbnNpdGlvbjogdHJhbnNmb3JtIDAuMnMsIGJveC1zaGFkb3cgMC4yczsKICAgICAgICB9CiAgICAgICAgCiAgICAgICAgLmJlbmVmaXQtY2FyZDpob3ZlciB7CiAgICAgICAgICAgIHRyYW5zZm9ybTogdHJhbnNsYXRlWSgtNXB4KTsKICAgICAgICAgICAgYm94LXNoYWRvdzogMCAxMHB4IDI1cHggcmdiYSgwLCAwLCAwLCAwLjEpOwogICAgICAgIH0KICAgICAgICAKICAgICAgICAuYmVuZWZpdC1jYXJkIGg0IHsKICAgICAgICAgICAgY29sb3I6ICM0ZjQ2ZTU7CiAgICAgICAgICAgIG1hcmdpbi10b3A6IDA7CiAgICAgICAgICAgIGZvbnQtc2l6ZTogMS4ycmVtOwogICAgICAgIH0KICAgICAgICAKICAgICAgICAvKiBUdTAwZTltb2lnbmFnZXMgKi8KICAgICAgICAudGVzdGltb25pYWxzIHsKICAgICAgICAgICAgZGlzcGxheTogZ3JpZDsKICAgICAgICAgICAgZ3JpZC10ZW1wbGF0ZS1jb2x1bW5zOiByZXBlYXQoYXV0by1maWxsLCBtaW5tYXgoMzUwcHgsIDFmcikpOwogICAgICAgICAgICBnYXA6IDMwcHg7CiAgICAgICAgICAgIG1hcmdpbjogMzBweCAwOwogICAgICAgIH0KICAgICAgICAKICAgICAgICAudGVzdGltb25pYWwtY2FyZCB7CiAgICAgICAgICAgIGJvcmRlci1sZWZ0OiA0cHggc29saWQgIzRmNDZlNTsKICAgICAgICAgICAgcGFkZGluZzogMjBweDsKICAgICAgICAgICAgYmFja2dyb3VuZDogI2Y5ZmFmYjsKICAgICAgICAgICAgYm9yZGVyLXJhZGl1czogMCA4cHggOHB4IDA7CiAgICAgICAgfQogICAgICAgIAogICAgICAgIC50ZXN0aW1vbmlhbC1jYXJkIHAgewogICAgICAgICAgICBmb250LXN0eWxlOiBpdGFsaWM7CiAgICAgICAgICAgIG1hcmdpbi1ib3R0b206IDE1cHg7CiAgICAgICAgfQogICAgICAgIAogICAgICAgIC50ZXN0aW1vbmlhbC1hdXRob3IgewogICAgICAgICAgICBmb250LXdlaWdodDogYm9sZDsKICAgICAgICAgICAgY29sb3I6ICM0MzM4Y2E7CiAgICAgICAgfQogICAgICAgIAogICAgICAgIC8qIEZBUSAqLwogICAgICAgIC5mYXEtaXRlbSB7CiAgICAgICAgICAgIG1hcmdpbi1ib3R0b206IDIwcHg7CiAgICAgICAgICAgIGJvcmRlci1ib3R0b206IDFweCBzb2xpZCAjZTVlN2ViOwogICAgICAgICAgICBwYWRkaW5nLWJvdHRvbTogMjBweDsKICAgICAgICB9CiAgICAgICAgCiAgICAgICAgLmZhcS1pdGVtIGg0IHsKICAgICAgICAgICAgY29sb3I6ICM0ZjQ2ZTU7CiAgICAgICAgICAgIG1hcmdpbjogMCAwIDEwcHg7CiAgICAgICAgICAgIGZvbnQtc2l6ZTogMS4ycmVtOwogICAgICAgIH0KICAgICAgICAKICAgICAgICAvKiBUYXJpZmljYXRpb24gKi8KICAgICAgICAucHJpY2luZyB7CiAgICAgICAgICAgIGJvcmRlcjogMnB4IHNvbGlkICM0ZjQ2ZTU7CiAgICAgICAgICAgIGJvcmRlci1yYWRpdXM6IDEycHg7CiAgICAgICAgICAgIHBhZGRpbmc6IDMwcHg7CiAgICAgICAgICAgIHRleHQtYWxpZ246IGNlbnRlcjsKICAgICAgICAgICAgbWFyZ2luOiA0MHB4IGF1dG87CiAgICAgICAgICAgIG1heC13aWR0aDogNjAwcHg7CiAgICAgICAgICAgIGJhY2tncm91bmQ6IHdoaXRlOwogICAgICAgIH0KICAgICAgICAKICAgICAgICAucHJpY2luZyBoMyB7CiAgICAgICAgICAgIGJhY2tncm91bmQ6ICM0ZjQ2ZTU7CiAgICAgICAgICAgIGNvbG9yOiB3aGl0ZTsKICAgICAgICAgICAgbWFyZ2luOiAtMzBweCAtMzBweCAyMHB4OwogICAgICAgICAgICBwYWRkaW5nOiAxNXB4OwogICAgICAgICAgICBib3JkZXItcmFkaXVzOiAxMHB4IDEwcHggMCAwOwogICAgICAgIH0KICAgICAgICAKICAgICAgICAub3JpZ2luYWwtcHJpY2UgewogICAgICAgICAgICB0ZXh0LWRlY29yYXRpb246IGxpbmUtdGhyb3VnaDsKICAgICAgICAgICAgY29sb3I6ICM2YjcyODA7CiAgICAgICAgICAgIGZvbnQtc2l6ZTogMS40cmVtOwogICAgICAgIH0KICAgICAgICAKICAgICAgICAuY3VycmVudC1wcmljZSB7CiAgICAgICAgICAgIGZvbnQtc2l6ZTogMi41cmVtOwogICAgICAgICAgICBjb2xvcjogIzRmNDZlNTsKICAgICAgICAgICAgZm9udC13ZWlnaHQ6IGJvbGQ7CiAgICAgICAgICAgIG1hcmdpbjogMTBweCAwOwogICAgICAgIH0KICAgICAgICAKICAgICAgICAuc2F2aW5ncyB7CiAgICAgICAgICAgIGRpc3BsYXk6IGlubGluZS1ibG9jazsKICAgICAgICAgICAgYmFja2dyb3VuZDogI2VjZmRmNTsKICAgICAgICAgICAgY29sb3I6ICMwNjVmNDY7CiAgICAgICAgICAgIHBhZGRpbmc6IDVweCAxNXB4OwogICAgICAgICAgICBib3JkZXItcmFkaXVzOiAzMHB4OwogICAgICAgICAgICBmb250LXdlaWdodDogYm9sZDsKICAgICAgICAgICAgbWFyZ2luOiAxMHB4IDA7CiAgICAgICAgfQogICAgICAgIAogICAgICAgIC5wYXltZW50LW9wdGlvbnMgewogICAgICAgICAgICBtYXJnaW46IDIwcHggMDsKICAgICAgICAgICAgZGlzcGxheTogZmxleDsKICAgICAgICAgICAgZmxleC13cmFwOiB3cmFwOwogICAgICAgICAgICBqdXN0aWZ5LWNvbnRlbnQ6IGNlbnRlcjsKICAgICAgICAgICAgZ2FwOiAxNXB4OwogICAgICAgIH0KICAgICAgICAKICAgICAgICAucGF5bWVudC1vcHRpb24gewogICAgICAgICAgICBmbGV4OiAxOwogICAgICAgICAgICBtaW4td2lkdGg6IDE1MHB4OwogICAgICAgICAgICBwYWRkaW5nOiAxNXB4OwogICAgICAgICAgICBib3JkZXI6IDFweCBzb2xpZCAjZTVlN2ViOwogICAgICAgICAgICBib3JkZXItcmFkaXVzOiA4cHg7CiAgICAgICAgICAgIHRyYW5zaXRpb246IGFsbCAwLjJzOwogICAgICAgIH0KICAgICAgICAKICAgICAgICAucGF5bWVudC1vcHRpb246aG92ZXIgewogICAgICAgICAgICBib3JkZXItY29sb3I6ICM0ZjQ2ZTU7CiAgICAgICAgICAgIHRyYW5zZm9ybTogc2NhbGUoMS4wNSk7CiAgICAgICAgfQogICAgICAgIAogICAgICAgIC5wYXltZW50LW9wdGlvbiBoNCB7CiAgICAgICAgICAgIG1hcmdpbjogMCAwIDVweDsKICAgICAgICAgICAgY29sb3I6ICM0ZjQ2ZTU7CiAgICAgICAgfQogICAgICAgIAogICAgICAgIC8qIEJvdXRvbiBkJ2FjdGlvbiAqLwogICAgICAgIC5jdGEtYnV0dG9uIHsKICAgICAgICAgICAgZGlzcGxheTogaW5saW5lLWJsb2NrOwogICAgICAgICAgICBiYWNrZ3JvdW5kOiAjNGY0NmU1OwogICAgICAgICAgICBjb2xvcjogd2hpdGU7CiAgICAgICAgICAgIHRleHQtZGVjb3JhdGlvbjogbm9uZTsKICAgICAgICAgICAgcGFkZGluZzogMTVweCAzMHB4OwogICAgICAgICAgICBib3JkZXItcmFkaXVzOiAzMHB4OwogICAgICAgICAgICBmb250LXdlaWdodDogYm9sZDsKICAgICAgICAgICAgZm9udC1zaXplOiAxLjJyZW07CiAgICAgICAgICAgIG1hcmdpbjogMjBweCAwOwogICAgICAgICAgICB0cmFuc2l0aW9uOiBiYWNrZ3JvdW5kIDAuMnM7CiAgICAgICAgICAgIGJveC1zaGFkb3c6IDAgNHB4IDE1cHggcmdiYSg3OSwgNzAsIDIyOSwgMC40KTsKICAgICAgICB9CiAgICAgICAgCiAgICAgICAgLmN0YS1idXR0b246aG92ZXIgewogICAgICAgICAgICBiYWNrZ3JvdW5kOiAjNDMzOGNhOwogICAgICAgICAgICB0cmFuc2Zvcm06IHRyYW5zbGF0ZVkoLTJweCk7CiAgICAgICAgfQogICAgICAgIAogICAgICAgIC8qIFBpZWQgZGUgcGFnZSAqLwogICAgICAgIGZvb3RlciB7CiAgICAgICAgICAgIGJhY2tncm91bmQ6ICMxZjI5Mzc7CiAgICAgICAgICAgIGNvbG9yOiB3aGl0ZTsKICAgICAgICAgICAgdGV4dC1hbGlnbjogY2VudGVyOwogICAgICAgICAgICBwYWRkaW5nOiAzMHB4IDIwcHg7CiAgICAgICAgICAgIG1hcmdpbi10b3A6IDYwcHg7CiAgICAgICAgfQogICAgICAgIAogICAgICAgIGZvb3RlciBwIHsKICAgICAgICAgICAgbWFyZ2luOiA1cHggMDsKICAgICAgICAgICAgZm9udC1zaXplOiAwLjlyZW07CiAgICAgICAgICAgIG9wYWNpdHk6IDAuODsKICAgICAgICB9CiAgICAgICAgCiAgICAgICAgLyogUmVzcG9uc2l2ZSAqLwogICAgICAgIEBtZWRpYSAobWF4LXdpZHRoOiA3NjhweCkgewogICAgICAgICAgICBoZWFkZXIgaDEgewogICAgICAgICAgICAgICAgZm9udC1zaXplOiAycmVtOwogICAgICAgICAgICB9CiAgICAgICAgICAgIAogICAgICAgICAgICAuYmVuZWZpdHMsIC50ZXN0aW1vbmlhbHMgewogICAgICAgICAgICAgICAgZ3JpZC10ZW1wbGF0ZS1jb2x1bW5zOiAxZnI7CiAgICAgICAgICAgIH0KICAgICAgICAgICAgCiAgICAgICAgICAgIC5wYXltZW50LW9wdGlvbnMgewogICAgICAgICAgICAgICAgZmxleC1kaXJlY3Rpb246IGNvbHVtbjsKICAgICAgICAgICAgfQogICAgICAgIH0KICAgIDwvc3R5bGU+CjwvaGVhZD4KPGJvZHk+CiAgICA8aGVhZGVyPgogICAgICAgIDxoMT5PZmZyZSBFeGNsdXNpdmUgcG91ciBNYXJpZTwvaDE+CiAgICAgICAgPHA+U3DDqWNpYWxlbWVudCBjcsOpw6llIHBvdXIgdm91cyBhaWRlciDDoCBhdHRlaW5kcmUgdm9zIG9iamVjdGlmczwvcD4KICAgIDwvaGVhZGVyPgogICAgCiAgICA8bWFpbj4KICAgICAgICA8c2VjdGlvbj4KICAgICAgICAgICAgPGgyPkJvbmpvdXIgTWFyaWUsPC9oMj4KICAgICAgICAgICAgPHA+U3VpdGUgw6Agbm90cmUgcmVuY29udHJlIGxlIHt7REFURV9SRU5DT05UUkV9fSwgaidhaSBsZSBwbGFpc2lyIGRlIHZvdXMgcHJvcG9zZXIgY2V0dGUgb2ZmcmUgcGVyc29ubmFsaXPDqWUgcG91ciBsZSBwcm9kdWl0IDxzdHJvbmc+Q29hY2hpbmcgU0VPPC9zdHJvbmc+LjwvcD4KICAgICAgICAgICAgPHA+Vm91cyBtJ2F2ZXogcGFydGFnw6kgdm90cmUgb2JqZWN0aWYgZGUgPHN0cm9uZz57e09CSkVDVElGU319PC9zdHJvbmc+LCBldCBqJ2FpIGNyw6nDqSBjZXR0ZSBwcm9wb3NpdGlvbiBwb3VyIHZvdXMgYWlkZXIgw6AgbCdhdHRlaW5kcmUgcmFwaWRlbWVudCBldCBlZmZpY2FjZW1lbnQuPC9wPgogICAgICAgIDwvc2VjdGlvbj4KICAgICAgICAKICAgICAgICA8c2VjdGlvbj4KICAgICAgICAgICAgPGgyPkxlcyBiw6luw6lmaWNlcyBxdWkgdm91cyBhdHRlbmRlbnQ8L2gyPgogICAgICAgICAgICA8ZGl2IGNsYXNzPSJiZW5lZml0cyI+CiAgICAgICAgICAgICAgICA8ZGl2IGNsYXNzPSJiZW5lZml0LWNhcmQiPgogICAgICAgICAgICAgICAgICAgIDxoND5Cw6luw6lmaWNlIDE8L2g0PgogICAgICAgICAgICAgICAgICAgIDxwPkRlc2NyaXB0aW9uIGTDqXRhaWxsw6llIGR1IHByZW1pZXIgYsOpbsOpZmljZSBxdWUgdm91cyBvYnRpZW5kcmV6LjwvcD4KICAgICAgICAgICAgICAgIDwvZGl2PgogICAgICAgICAgICAgICAgPGRpdiBjbGFzcz0iYmVuZWZpdC1jYXJkIj4KICAgICAgICAgICAgICAgICAgICA8aDQ+QsOpbsOpZmljZSAyPC9oND4KICAgICAgICAgICAgICAgICAgICA8cD5EZXNjcmlwdGlvbiBkw6l0YWlsbMOpZSBkdSBzZWNvbmQgYsOpbsOpZmljZSBxdWUgdm91cyBvYnRpZW5kcmV6LjwvcD4KICAgICAgICAgICAgICAgIDwvZGl2PgogICAgICAgICAgICAgICAgPGRpdiBjbGFzcz0iYmVuZWZpdC1jYXJkIj4KICAgICAgICAgICAgICAgICAgICA8aDQ+QsOpbsOpZmljZSAzPC9oND4KICAgICAgICAgICAgICAgICAgICA8cD5EZXNjcmlwdGlvbiBkw6l0YWlsbMOpZSBkdSB0cm9pc2nDqG1lIGLDqW7DqWZpY2UgcXVlIHZvdXMgb2J0aWVuZHJlei48L3A+CiAgICAgICAgICAgICAgICA8L2Rpdj4KICAgICAgICAgICAgPC9kaXY+CiAgICAgICAgPC9zZWN0aW9uPgogICAgICAgIAogICAgICAgIDxzZWN0aW9uPgogICAgICAgICAgICA8aDI+Q2UgcXVlIG5vcyBjbGllbnRzIGRpc2VudDwvaDI+CiAgICAgICAgICAgIDxkaXYgY2xhc3M9InRlc3RpbW9uaWFscyI+CiAgICAgICAgICAgICAgICA8ZGl2IGNsYXNzPSJ0ZXN0aW1vbmlhbC1jYXJkIj4KICAgICAgICAgICAgICAgICAgICA8cD4iVMOpbW9pZ25hZ2UgZMOpdGFpbGzDqSBkJ3VuIGNsaWVudCBzYXRpc2ZhaXQgcXVpIHBhcnRhZ2Ugc29uIGV4cMOpcmllbmNlIHBvc2l0aXZlIGV0IGxlcyByw6lzdWx0YXRzIG9idGVudXMuIjwvcD4KICAgICAgICAgICAgICAgICAgICA8ZGl2IGNsYXNzPSJ0ZXN0aW1vbmlhbC1hdXRob3IiPk1hcmllIEQuLCAzNCBhbnM8L2Rpdj4KICAgICAgICAgICAgICAgIDwvZGl2PgogICAgICAgICAgICAgICAgPGRpdiBjbGFzcz0idGVzdGltb25pYWwtY2FyZCI+CiAgICAgICAgICAgICAgICAgICAgPHA+IlNlY29uZCB0w6ltb2lnbmFnZSBkJ3VuIGNsaWVudCBzYXRpc2ZhaXQgcXVpIHJhY29udGUgY29tbWVudCBsZSBwcm9kdWl0IGEgY2hhbmfDqSBzYSB2aWUgcG9zaXRpdmVtZW50LiI8L3A+CiAgICAgICAgICAgICAgICAgICAgPGRpdiBjbGFzcz0idGVzdGltb25pYWwtYXV0aG9yIj5UaG9tYXMgTC4sIDQyIGFuczwvZGl2PgogICAgICAgICAgICAgICAgPC9kaXY+CiAgICAgICAgICAgIDwvZGl2PgogICAgICAgIDwvc2VjdGlvbj4KICAgICAgICAKICAgICAgICA8c2VjdGlvbj4KICAgICAgICAgICAgPGgyPlZvcyBxdWVzdGlvbnMgZnLDqXF1ZW50ZXM8L2gyPgogICAgICAgICAgICA8ZGl2IGNsYXNzPSJmYXEiPgogICAgICAgICAgICAgICAgPGRpdiBjbGFzcz0iZmFxLWl0ZW0iPgogICAgICAgICAgICAgICAgICAgIDxoND5RdWVzdGlvbiBmcsOpcXVlbnRlIDEgPzwvaDQ+CiAgICAgICAgICAgICAgICAgICAgPHA+UsOpcG9uc2UgZMOpdGFpbGzDqWUgw6AgbGEgcHJlbWnDqHJlIHF1ZXN0aW9uIGZyw6lxdWVudGUgcG91ciByYXNzdXJlciBsZSBjbGllbnQgcG90ZW50aWVsLjwvcD4KICAgICAgICAgICAgICAgIDwvZGl2PgogICAgICAgICAgICAgICAgPGRpdiBjbGFzcz0iZmFxLWl0ZW0iPgogICAgICAgICAgICAgICAgICAgIDxoND5RdWVzdGlvbiBmcsOpcXVlbnRlIDIgPzwvaDQ+CiAgICAgICAgICAgICAgICAgICAgPHA+UsOpcG9uc2UgZMOpdGFpbGzDqWUgw6AgbGEgZGV1eGnDqG1lIHF1ZXN0aW9uIGZyw6lxdWVudGUgcG91ciBhbnRpY2lwZXIgbGVzIG9iamVjdGlvbnMuPC9wPgogICAgICAgICAgICAgICAgPC9kaXY+CiAgICAgICAgICAgICAgICA8ZGl2IGNsYXNzPSJmYXEtaXRlbSI+CiAgICAgICAgICAgICAgICAgICAgPGg0PlF1ZXN0aW9uIGZyw6lxdWVudGUgMyA/PC9oND4KICAgICAgICAgICAgICAgICAgICA8cD5Sw6lwb25zZSBkw6l0YWlsbMOpZSDDoCBsYSB0cm9pc2nDqG1lIHF1ZXN0aW9uIGZyw6lxdWVudGUgcG91ciBjbGFyaWZpZXIgbGVzIGRvdXRlcy48L3A+CiAgICAgICAgICAgICAgICA8L2Rpdj4KICAgICAgICAgICAgPC9kaXY+CiAgICAgICAgPC9zZWN0aW9uPgogICAgICAgIAogICAgICAgIDxzZWN0aW9uPgogICAgICAgICAgICA8aDI+Vm90cmUgb2ZmcmUgcGVyc29ubmFsaXPDqWU8L2gyPgogICAgICAgICAgICA8ZGl2IGNsYXNzPSJwcmljaW5nIj4KICAgICAgICAgICAgICAgIDxoMz5QYWNrIFNFTyBFeHBlcnQ8L2gzPgogICAgICAgICAgICAgICAgPGRpdiBjbGFzcz0ib3JpZ2luYWwtcHJpY2UiPlByaXggbm9ybWFsOiAyOTk34oKsPC9kaXY+CiAgICAgICAgICAgICAgICA8ZGl2IGNsYXNzPSJjdXJyZW50LXByaWNlIj57e1BSSVhfVU5JUVVFfX08L2Rpdj4KICAgICAgICAgICAgICAgIDxkaXYgY2xhc3M9InNhdmluZ3MiPsOJY29ub21pc2V6IDEwMDDigqw8L2Rpdj4KICAgICAgICAgICAgICAgIAogICAgICAgICAgICAgICAgPHA+T3UgcHLDqWbDqXJlei12b3VzIHBheWVyIGVuIHBsdXNpZXVycyBmb2lzID88L3A+CiAgICAgICAgICAgICAgICAKICAgICAgICAgICAgICAgIDxkaXYgY2xhc3M9InBheW1lbnQtb3B0aW9ucyI+CiAgICAgICAgICAgICAgICAgICAgPGRpdiBjbGFzcz0icGF5bWVudC1vcHRpb24iPgogICAgICAgICAgICAgICAgICAgICAgICA8aDQ+UGFpZW1lbnQgdW5pcXVlPC9oND4KICAgICAgICAgICAgICAgICAgICAgICAgPGRpdj57e1BSSVhfVU5JUVVFfX08L2Rpdj4KICAgICAgICAgICAgICAgICAgICA8L2Rpdj4KICAgICAgICAgICAgICAgICAgICA8ZGl2IGNsYXNzPSJwYXltZW50LW9wdGlvbiI+CiAgICAgICAgICAgICAgICAgICAgICAgIDxoND4zIG1lbnN1YWxpdMOpczwvaDQ+CiAgICAgICAgICAgICAgICAgICAgICAgIDxkaXY+NjY14oKsIHggMzwvZGl2PgogICAgICAgICAgICAgICAgICAgIDwvZGl2PgogICAgICAgICAgICAgICAgICAgIDxkaXYgY2xhc3M9InBheW1lbnQtb3B0aW9uIj4KICAgICAgICAgICAgICAgICAgICAgICAgPGg0PjYgbWVuc3VhbGl0w6lzPC9oND4KICAgICAgICAgICAgICAgICAgICAgICAgPGRpdj4zMzLigqwgeCA2PC9kaXY+CiAgICAgICAgICAgICAgICAgICAgPC9kaXY+CiAgICAgICAgICAgICAgICA8L2Rpdj4KICAgICAgICAgICAgICAgIAogICAgICAgICAgICAgICAgPHA+PHN0cm9uZz5TZXVsZW1lbnQgNSBwbGFjZXMgZGlzcG9uaWJsZXMgITwvc3Ryb25nPjwvcD4KICAgICAgICAgICAgICAgIDxwPkxlIHByb2dyYW1tZSBjb21tZW5jZSBsZSAwNS8wMi8yMDI1PC9wPgogICAgICAgICAgICAgICAgCiAgICAgICAgICAgICAgICA8YSBocmVmPSJodHRwczovL3dhLm1lLyszMzY5ODc2NTQzMj90ZXh0PUJvbmpvdXIsJTIwamUlMjBzdWlzJTIwaW50w6lyZXNzw6koZSklMjBwYXIlMjBsJ29mZnJlJTIwcG91ciUyMGxlJTIwcHJvZHVpdCUyMENvYWNoaW5nIFNFTyIgY2xhc3M9ImN0YS1idXR0b24iPlLDqXNlcnZlciBtYSBwbGFjZSBtYWludGVuYW50PC9hPgogICAgICAgICAgICA8L2Rpdj4KICAgICAgICA8L3NlY3Rpb24+CiAgICA8L21haW4+CiAgICAKICAgIDxmb290ZXI+CiAgICAgICAgPHA+Q2V0dGUgb2ZmcmUgZXN0IHBlcnNvbm5hbGlzw6llIHBvdXIgTWFyaWUgTWFydGluPC9wPgogICAgICAgIDxwPkfDqW7DqXLDqWUgbGUgMjQvMDUvMjAyNTwvcD4KICAgICAgICA8cD5Qb3VyIHRvdXRlIHF1ZXN0aW9uLCBjb250YWN0ZXotbm91cyBhdSArMzM2OTg3NjU0MzI8L3A+CiAgICA8L2Zvb3Rlcj4KPC9ib2R5Pgo8L2h0bWw+Cg==';
+        
+        function checkPassword(event) {
+            event.preventDefault();
+            
+            const password = document.getElementById('password').value;
+            const errorMessage = document.getElementById('error-message');
+            const loading = document.getElementById('loading');
+            const loginForm = document.getElementById('login-form');
+            const protectedContent = document.getElementById('protected-content');
+            
+            // Afficher le chargement
+            loading.style.display = 'block';
+            errorMessage.style.display = 'none';
+            
+            // Simuler une vérification (pour l'UX)
+            setTimeout(() => {
+                loading.style.display = 'none';
+                
+                if (password === correctCode) {
+                    // Accès autorisé
+                    loginForm.style.display = 'none';
+                    
+                    // Décoder et afficher le contenu
+                    const decodedContent = atob(encodedContent);
+                    protectedContent.innerHTML = decodedContent;
+                    protectedContent.style.display = 'block';
+                    protectedContent.classList.add('content-visible');
+                    
+                    // Sauvegarder dans sessionStorage
+                    sessionStorage.setItem('soulful_access_' + window.location.pathname, 'granted');
+                } else {
+                    // Accès refusé
+                    errorMessage.style.display = 'block';
+                    document.getElementById('password').value = '';
+                    document.getElementById('password').focus();
+                }
+            }, 500);
+        }
+        
+        // Vérifier si l'utilisateur a déjà accès
+        window.onload = function() {
+            if (sessionStorage.getItem('soulful_access_' + window.location.pathname) === 'granted') {
+                document.getElementById('login-form').style.display = 'none';
+                const protectedContent = document.getElementById('protected-content');
+                const decodedContent = atob(encodedContent);
+                protectedContent.innerHTML = decodedContent;
+                protectedContent.style.display = 'block';
+            }
+        };
+    </script>
+</body>
+</html>
