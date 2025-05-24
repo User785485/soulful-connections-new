@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Accès Protégé - Jean</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .login-container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 400px;
+            width: 100%;
+            text-align: center;
+            backdrop-filter: blur(10px);
+            transition: transform 0.3s ease;
+        }
+        
+        .login-container:hover {
+            transform: translateY(-5px);
+        }
+        
+        .lock-icon {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 30px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+            color: white;
+        }
+        
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 28px;
+        }
+        
+        .client-name {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 18px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            color: #555;
+            margin-bottom: 10px;
+            font-weight: 500;
+        }
+        
+        input[type="password"] {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            background: #f8f8f8;
+        }
+        
+        input[type="password"]:focus {
+            outline: none;
+            border-color: #667eea;
+            background: white;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.2);
+        }
+        
+        button {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 10px;
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+        }
+        
+        button:active {
+            transform: translateY(0);
+        }
+        
+        .error-message {
+            color: #e74c3c;
+            margin-top: 15px;
+            padding: 10px;
+            background: #fee;
+            border-radius: 8px;
+            display: none;
+            animation: shake 0.5s ease-in-out;
+        }
+        
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
+        }
+        
+        .loading {
+            display: none;
+            margin-top: 15px;
+            color: #666;
+        }
+        
+        .spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-right: 10px;
+            vertical-align: middle;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        #protected-content {
+            display: none;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .content-visible {
+            animation: fadeIn 0.5s ease-in-out;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container" id="login-form">
+        <div class="lock-icon">🔒</div>
+        <h1>Accès Protégé</h1>
+        <p class="client-name">Page personnalisée pour Jean</p>
+        
+        <form onsubmit="checkPassword(event)">
+            <div class="form-group">
+                <label for="password">Code d'accès</label>
+                <input type="password" id="password" placeholder="Entrez le code d'accès" required autofocus>
+            </div>
+            <button type="submit">Accéder à la page</button>
+        </form>
+        
+        <div class="error-message" id="error-message">
+            Code d'accès incorrect. Veuillez réessayer.
+        </div>
+        
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            Vérification en cours...
+        </div>
+    </div>
+    
+    <div id="protected-content"></div>
+    
+    <script>
+        // Code d'accès
+        const correctCode = '7744';
+        
+        // Contenu encodé en base64
+        const encodedContent = 'PCFET0NUWVBFIGh0bWw+CjxodG1sIGxhbmc9ImZyIj4KPGhlYWQ+CiAgICA8bWV0YSBjaGFyc2V0PSJVVEYtOCI+CiAgICA8bWV0YSBuYW1lPSJ2aWV3cG9ydCIgY29udGVudD0id2lkdGg9ZGV2aWNlLXdpZHRoLCBpbml0aWFsLXNjYWxlPTEuMCI+CiAgICA8dGl0bGU+Q29tcHRlLXJlbmR1IHBvdXIgSmVhbiBEdXBvbnQ8L3RpdGxlPgogICAgPHN0eWxlPgogICAgICAgIC8qIFN0eWxlcyBkZSBiYXNlICovCiAgICAgICAgYm9keSwgaHRtbCB7CiAgICAgICAgICAgIG1hcmdpbjogMDsKICAgICAgICAgICAgcGFkZGluZzogMDsKICAgICAgICAgICAgZm9udC1mYW1pbHk6ICdTZWdvZSBVSScsIFRhaG9tYSwgR2VuZXZhLCBWZXJkYW5hLCBzYW5zLXNlcmlmOwogICAgICAgICAgICBsaW5lLWhlaWdodDogMS42OwogICAgICAgICAgICBjb2xvcjogIzMzMzsKICAgICAgICAgICAgYmFja2dyb3VuZC1jb2xvcjogI2Y4ZmFmYzsKICAgICAgICB9CiAgICAgICAgCiAgICAgICAgLyogRW4tdMOqdGUgKi8KICAgICAgICBoZWFkZXIgewogICAgICAgICAgICBiYWNrZ3JvdW5kOiBsaW5lYXItZ3JhZGllbnQoMTM1ZGVnLCAjMGVhNWU5IDAlLCAjMDM2OWExIDEwMCUpOwogICAgICAgICAgICBjb2xvcjogd2hpdGU7CiAgICAgICAgICAgIHBhZGRpbmc6IDMwcHggMjBweDsKICAgICAgICAgICAgdGV4dC1hbGlnbjogY2VudGVyOwogICAgICAgIH0KICAgICAgICAKICAgICAgICBoZWFkZXIgaDEgewogICAgICAgICAgICBtYXJnaW46IDA7CiAgICAgICAgICAgIGZvbnQtc2l6ZTogMi4ycmVtOwogICAgICAgICAgICBsZXR0ZXItc3BhY2luZzogLTAuNXB4OwogICAgICAgIH0KICAgICAgICAKICAgICAgICBoZWFkZXIgcCB7CiAgICAgICAgICAgIG1hcmdpbjogMTBweCAwIDA7CiAgICAgICAgICAgIGZvbnQtc2l6ZTogMS4xcmVtOwogICAgICAgICAgICBvcGFjaXR5OiAwLjk7CiAgICAgICAgfQogICAgICAgIAogICAgICAgIC8qIENvbnRlbnUgcHJpbmNpcGFsICovCiAgICAgICAgbWFpbiB7CiAgICAgICAgICAgIG1heC13aWR0aDogODAwcHg7CiAgICAgICAgICAgIG1hcmdpbjogMCBhdXRvOwogICAgICAgICAgICBwYWRkaW5nOiA0MHB4IDIwcHg7CiAgICAgICAgfQogICAgICAgIAogICAgICAgIHNlY3Rpb24gewogICAgICAgICAgICBtYXJnaW4tYm90dG9tOiA0MHB4OwogICAgICAgICAgICBiYWNrZ3JvdW5kOiB3aGl0ZTsKICAgICAgICAgICAgYm9yZGVyLXJhZGl1czogOHB4OwogICAgICAgICAgICBib3gtc2hhZG93OiAwIDVweCAxNXB4IHJnYmEoMCwgMCwgMCwgMC4wNSk7CiAgICAgICAgICAgIHBhZGRpbmc6IDI1cHg7CiAgICAgICAgfQogICAgICAgIAogICAgICAgIGgyIHsKICAgICAgICAgICAgY29sb3I6ICMwMjg0Yzc7CiAgICAgICAgICAgIG1hcmdpbi10b3A6IDA7CiAgICAgICAgICAgIGZvbnQtc2l6ZTogMS42cmVtOwogICAgICAgICAgICBib3JkZXItYm90dG9tOiAycHggc29saWQgI2UwZjJmZTsKICAgICAgICAgICAgcGFkZGluZy1ib3R0b206IDEwcHg7CiAgICAgICAgfQogICAgICAgIAogICAgICAgIGgzIHsKICAgICAgICAgICAgY29sb3I6ICMwMzY5YTE7CiAgICAgICAgICAgIGZvbnQtc2l6ZTogMS4zcmVtOwogICAgICAgICAgICBtYXJnaW46IDI1cHggMCAxNXB4OwogICAgICAgIH0KICAgICAgICAKICAgICAgICBwIHsKICAgICAgICAgICAgbWFyZ2luOiAxNXB4IDA7CiAgICAgICAgICAgIGNvbG9yOiAjMzM0MTU1OwogICAgICAgIH0KICAgICAgICAKICAgICAgICAvKiBMaXN0ZSAqLwogICAgICAgIHVsLCBvbCB7CiAgICAgICAgICAgIHBhZGRpbmctbGVmdDogMjVweDsKICAgICAgICB9CiAgICAgICAgCiAgICAgICAgbGkgewogICAgICAgICAgICBtYXJnaW4tYm90dG9tOiAxMHB4OwogICAgICAgICAgICBjb2xvcjogIzMzNDE1NTsKICAgICAgICB9CiAgICAgICAgCiAgICAgICAgLyogUsOpc3Vtw6kgKi8KICAgICAgICAuc3VtbWFyeSB7CiAgICAgICAgICAgIGJhY2tncm91bmQtY29sb3I6ICNmMGY5ZmY7CiAgICAgICAgICAgIGJvcmRlci1sZWZ0OiA0cHggc29saWQgIzBlYTVlOTsKICAgICAgICAgICAgcGFkZGluZzogMTVweDsKICAgICAgICAgICAgbWFyZ2luOiAyMHB4IDA7CiAgICAgICAgICAgIGJvcmRlci1yYWRpdXM6IDAgOHB4IDhweCAwOwogICAgICAgIH0KICAgICAgICAKICAgICAgICAvKiBBY3Rpb25zICovCiAgICAgICAgLmFjdGlvbnMgewogICAgICAgICAgICBtYXJnaW4tdG9wOiAzMHB4OwogICAgICAgIH0KICAgICAgICAKICAgICAgICAuYWN0aW9uLWl0ZW0gewogICAgICAgICAgICBiYWNrZ3JvdW5kOiAjZjFmNWY5OwogICAgICAgICAgICBib3JkZXItcmFkaXVzOiA4cHg7CiAgICAgICAgICAgIHBhZGRpbmc6IDE1cHg7CiAgICAgICAgICAgIG1hcmdpbi1ib3R0b206IDE1cHg7CiAgICAgICAgICAgIGRpc3BsYXk6IGZsZXg7CiAgICAgICAgICAgIGFsaWduLWl0ZW1zOiBmbGV4LXN0YXJ0OwogICAgICAgIH0KICAgICAgICAKICAgICAgICAuYWN0aW9uLWl0ZW0tbnVtYmVyIHsKICAgICAgICAgICAgZGlzcGxheTogZmxleDsKICAgICAgICAgICAganVzdGlmeS1jb250ZW50OiBjZW50ZXI7CiAgICAgICAgICAgIGFsaWduLWl0ZW1zOiBjZW50ZXI7CiAgICAgICAgICAgIHdpZHRoOiAzMHB4OwogICAgICAgICAgICBoZWlnaHQ6IDMwcHg7CiAgICAgICAgICAgIGJhY2tncm91bmQ6ICMwZWE1ZTk7CiAgICAgICAgICAgIGNvbG9yOiB3aGl0ZTsKICAgICAgICAgICAgYm9yZGVyLXJhZGl1czogNTAlOwogICAgICAgICAgICBmb250LXdlaWdodDogYm9sZDsKICAgICAgICAgICAgbWFyZ2luLXJpZ2h0OiAxNXB4OwogICAgICAgICAgICBmbGV4LXNocmluazogMDsKICAgICAgICB9CiAgICAgICAgCiAgICAgICAgLmFjdGlvbi1pdGVtLWNvbnRlbnQgewogICAgICAgICAgICBmbGV4LWdyb3c6IDE7CiAgICAgICAgfQogICAgICAgIAogICAgICAgIC5hY3Rpb24taXRlbSBoNCB7CiAgICAgICAgICAgIG1hcmdpbjogMCAwIDhweDsKICAgICAgICAgICAgY29sb3I6ICMwMjg0Yzc7CiAgICAgICAgfQogICAgICAgIAogICAgICAgIC8qIE5vdGVzICovCiAgICAgICAgLm5vdGVzIHsKICAgICAgICAgICAgYmFja2dyb3VuZDogI2ZmZmJlYjsKICAgICAgICAgICAgYm9yZGVyLXJhZGl1czogOHB4OwogICAgICAgICAgICBwYWRkaW5nOiAxNXB4OwogICAgICAgICAgICBtYXJnaW4tdG9wOiAyMHB4OwogICAgICAgICAgICBib3JkZXI6IDFweCBkYXNoZWQgI2ZiYmYyNDsKICAgICAgICB9CiAgICAgICAgCiAgICAgICAgLm5vdGVzIGgzIHsKICAgICAgICAgICAgY29sb3I6ICNiNDUzMDk7CiAgICAgICAgICAgIG1hcmdpbi10b3A6IDA7CiAgICAgICAgfQogICAgICAgIAogICAgICAgIC8qIFBpZWQgZGUgcGFnZSAqLwogICAgICAgIGZvb3RlciB7CiAgICAgICAgICAgIGJhY2tncm91bmQ6ICMwZjE3MmE7CiAgICAgICAgICAgIGNvbG9yOiB3aGl0ZTsKICAgICAgICAgICAgdGV4dC1hbGlnbjogY2VudGVyOwogICAgICAgICAgICBwYWRkaW5nOiAyMHB4OwogICAgICAgICAgICBtYXJnaW4tdG9wOiA2MHB4OwogICAgICAgICAgICBmb250LXNpemU6IDAuOXJlbTsKICAgICAgICB9CiAgICAgICAgCiAgICAgICAgZm9vdGVyIHAgewogICAgICAgICAgICBtYXJnaW46IDVweCAwOwogICAgICAgICAgICBjb2xvcjogI2NiZDVlMTsKICAgICAgICB9CiAgICAgICAgCiAgICAgICAgLyogUmVzcG9uc2l2ZSAqLwogICAgICAgIEBtZWRpYSAobWF4LXdpZHRoOiA3NjhweCkgewogICAgICAgICAgICBoZWFkZXIgaDEgewogICAgICAgICAgICAgICAgZm9udC1zaXplOiAxLjhyZW07CiAgICAgICAgICAgIH0KICAgICAgICAgICAgCiAgICAgICAgICAgIG1haW4gewogICAgICAgICAgICAgICAgcGFkZGluZzogMjBweDsKICAgICAgICAgICAgfQogICAgICAgIH0KICAgIDwvc3R5bGU+CjwvaGVhZD4KPGJvZHk+CiAgICA8aGVhZGVyPgogICAgICAgIDxoMT5Db21wdGUtcmVuZHUgZGUgbm90cmUgcmVuY29udHJlPC9oMT4KICAgICAgICA8cD5KZWFuIER1cG9udCB8IDE1LzAxLzIwMjU8L3A+CiAgICA8L2hlYWRlcj4KICAgIAogICAgPG1haW4+CiAgICAgICAgPHNlY3Rpb24+CiAgICAgICAgICAgIDxoMj5Sw6lzdW3DqSBkZSBub3RyZSDDqWNoYW5nZTwvaDI+CiAgICAgICAgICAgIDxwPkJvbmpvdXIgSmVhbiw8L3A+CiAgICAgICAgICAgIDxwPkplIHZvdXMgcmVtZXJjaWUgcG91ciBub3RyZSDDqWNoYW5nZSBkdSAxNS8wMS8yMDI1LiBDZSBkb2N1bWVudCByw6lzdW1lIGxlcyBwb2ludHMgcHJpbmNpcGF1eCBxdWUgbm91cyBhdm9ucyBhYm9yZMOpcyBjb25jZXJuYW50IHt7UFJPRFVJVH19LjwvcD4KICAgICAgICAgICAgCiAgICAgICAgICAgIDxkaXYgY2xhc3M9InN1bW1hcnkiPgogICAgICAgICAgICAgICAgPHA+Vm91cyBtJ2F2ZXogcGFydGFnw6kgdm90cmUgb2JqZWN0aWYgcHJpbmNpcGFsIDogPHN0cm9uZz5EZXZlbmlyIGV4cGVydCBFeGNlbCBlbiAzIG1vaXM8L3N0cm9uZz4uPC9wPgogICAgICAgICAgICA8L2Rpdj4KICAgICAgICA8L3NlY3Rpb24+CiAgICAgICAgCiAgICAgICAgPHNlY3Rpb24+CiAgICAgICAgICAgIDxoMj5SZWNvbW1hbmRhdGlvbnMgcGVyc29ubmFsaXPDqWVzPC9oMj4KICAgICAgICAgICAgPHA+U3VpdGUgw6Agbm90cmUgZGlzY3Vzc2lvbiwgdm9pY2kgbGVzIHJlY29tbWFuZGF0aW9ucyBxdWUgamUgdm91cyBwcm9wb3NlIHBvdXIgYXR0ZWluZHJlIHZvcyBvYmplY3RpZnMgOjwvcD4KICAgICAgICAgICAgCiAgICAgICAgICAgIDxkaXYgY2xhc3M9InJlY29tbWVuZGF0aW9ucyI+CiAgICAgICAgICAgICAgICDigKIgU3VpdnJlIGxlcyBtb2R1bGVzIGRhbnMgbCdvcmRyZTxicj7igKIgRmFpcmUgdG91cyBsZXMgZXhlcmNpY2VzPGJyPuKAoiBQYXJ0aWNpcGVyIGF1eCBzZXNzaW9ucyBsaXZlCiAgICAgICAgICAgIDwvZGl2PgogICAgICAgICAgICAKICAgICAgICAgICAgPHA+Q2VzIHJlY29tbWFuZGF0aW9ucyBzb250IGJhc8OpZXMgc3VyIHZvdHJlIHNpdHVhdGlvbiBzcMOpY2lmaXF1ZSBldCB2b3Mgb2JqZWN0aWZzLjwvcD4KICAgICAgICA8L3NlY3Rpb24+CiAgICAgICAgCiAgICAgICAgPHNlY3Rpb24+CiAgICAgICAgICAgIDxoMj5Qcm9jaGFpbmVzIMOpdGFwZXM8L2gyPgogICAgICAgICAgICA8cD5Qb3VyIGF2YW5jZXIgZWZmaWNhY2VtZW50LCBqZSB2b3VzIHN1Z2fDqHJlIGRlIHN1aXZyZSBjZXMgw6l0YXBlcyA6PC9wPgogICAgICAgICAgICAKICAgICAgICAgICAgPGRpdiBjbGFzcz0iYWN0aW9ucyI+CiAgICAgICAgICAgICAgICA8ZGl2IGNsYXNzPSJhY3Rpb24taXRlbSI+CiAgICAgICAgICAgICAgICAgICAgPGRpdiBjbGFzcz0iYWN0aW9uLWl0ZW0tbnVtYmVyIj4xPC9kaXY+CiAgICAgICAgICAgICAgICAgICAgPGRpdiBjbGFzcz0iYWN0aW9uLWl0ZW0tY29udGVudCI+CiAgICAgICAgICAgICAgICAgICAgICAgIDxoND7DiXR1ZGllciBsYSBwcm9wb3NpdGlvbjwvaDQ+CiAgICAgICAgICAgICAgICAgICAgICAgIDxwPlByZW5leiBsZSB0ZW1wcyBkJ2V4YW1pbmVyIGwnb2ZmcmUgcXVlIGplIHZvdXMgYWkgZW52b3nDqWUgcG91ciB7e1BST0RVSVR9fS48L3A+CiAgICAgICAgICAgICAgICAgICAgPC9kaXY+CiAgICAgICAgICAgICAgICA8L2Rpdj4KICAgICAgICAgICAgICAgIAogICAgICAgICAgICAgICAgPGRpdiBjbGFzcz0iYWN0aW9uLWl0ZW0iPgogICAgICAgICAgICAgICAgICAgIDxkaXYgY2xhc3M9ImFjdGlvbi1pdGVtLW51bWJlciI+MjwvZGl2PgogICAgICAgICAgICAgICAgICAgIDxkaXYgY2xhc3M9ImFjdGlvbi1pdGVtLWNvbnRlbnQiPgogICAgICAgICAgICAgICAgICAgICAgICA8aDQ+TWUgY29udGFjdGVyIHBvdXIgdm9zIHF1ZXN0aW9uczwvaDQ+CiAgICAgICAgICAgICAgICAgICAgICAgIDxwPk4naMOpc2l0ZXogcGFzIMOgIG1lIGNvbnRhY3RlciBhdSArMzM2MTIzNDU2Nzggc2kgdm91cyBhdmV6IGRlcyBxdWVzdGlvbnMuPC9wPgogICAgICAgICAgICAgICAgICAgIDwvZGl2PgogICAgICAgICAgICAgICAgPC9kaXY+CiAgICAgICAgICAgICAgICAKICAgICAgICAgICAgICAgIDxkaXYgY2xhc3M9ImFjdGlvbi1pdGVtIj4KICAgICAgICAgICAgICAgICAgICA8ZGl2IGNsYXNzPSJhY3Rpb24taXRlbS1udW1iZXIiPjM8L2Rpdj4KICAgICAgICAgICAgICAgICAgICA8ZGl2IGNsYXNzPSJhY3Rpb24taXRlbS1jb250ZW50Ij4KICAgICAgICAgICAgICAgICAgICAgICAgPGg0PkNvbmZpcm1lciB2b3RyZSBpbnTDqXLDqnQ8L2g0PgogICAgICAgICAgICAgICAgICAgICAgICA8cD5TaSBjZXR0ZSBvZmZyZSB2b3VzIGNvbnZpZW50LCBjb25maXJtZXogdm90cmUgaW50w6lyw6p0IGF2YW50IGxlIHt7REFURV9ERUJVVF9QUk9HUkFNTUV9fS48L3A+CiAgICAgICAgICAgICAgICAgICAgPC9kaXY+CiAgICAgICAgICAgICAgICA8L2Rpdj4KICAgICAgICAgICAgPC9kaXY+CiAgICAgICAgICAgIAogICAgICAgICAgICA8ZGl2IGNsYXNzPSJub3RlcyI+CiAgICAgICAgICAgICAgICA8aDM+Tm90ZXMgaW1wb3J0YW50ZXM8L2gzPgogICAgICAgICAgICAgICAgPHA+TCdvZmZyZSBzcMOpY2lhbGUgZGUge3tPRkZSRV9TUEVDSUFMRX19IGVzdCB2YWxhYmxlIGp1c3F1J2F1IHt7REFURV9ERUJVVF9QUk9HUkFNTUV9fS48L3A+CiAgICAgICAgICAgICAgICA8cD5MZSBub21icmUgZGUgcGxhY2VzIGRpc3BvbmlibGVzIGVzdCBsaW1pdMOpIMOgIHt7UExBQ0VTX0RJU1BPTklCTEVTfX0uPC9wPgogICAgICAgICAgICA8L2Rpdj4KICAgICAgICA8L3NlY3Rpb24+CiAgICA8L21haW4+CiAgICAKICAgIDxmb290ZXI+CiAgICAgICAgPHA+Q2UgY29tcHRlLXJlbmR1IGVzdCBwZXJzb25uYWxpc8OpIHBvdXIgSmVhbiBEdXBvbnQ8L3A+CiAgICAgICAgPHA+R8OpbsOpcsOpIGxlIDI0LzA1LzIwMjU8L3A+CiAgICAgICAgPHA+UG91ciB0b3V0ZSBxdWVzdGlvbiwgY29udGFjdGV6LW5vdXMgYXUge3tOVU1FUk9fV0hBVFNBUFB9fTwvcD4KICAgIDwvZm9vdGVyPgo8L2JvZHk+CjwvaHRtbD4K';
+        
+        function checkPassword(event) {
+            event.preventDefault();
+            
+            const password = document.getElementById('password').value;
+            const errorMessage = document.getElementById('error-message');
+            const loading = document.getElementById('loading');
+            const loginForm = document.getElementById('login-form');
+            const protectedContent = document.getElementById('protected-content');
+            
+            // Afficher le chargement
+            loading.style.display = 'block';
+            errorMessage.style.display = 'none';
+            
+            // Simuler une vérification (pour l'UX)
+            setTimeout(() => {
+                loading.style.display = 'none';
+                
+                if (password === correctCode) {
+                    // Accès autorisé
+                    loginForm.style.display = 'none';
+                    
+                    // Décoder et afficher le contenu
+                    const decodedContent = atob(encodedContent);
+                    protectedContent.innerHTML = decodedContent;
+                    protectedContent.style.display = 'block';
+                    protectedContent.classList.add('content-visible');
+                    
+                    // Sauvegarder dans sessionStorage
+                    sessionStorage.setItem('soulful_access_' + window.location.pathname, 'granted');
+                } else {
+                    // Accès refusé
+                    errorMessage.style.display = 'block';
+                    document.getElementById('password').value = '';
+                    document.getElementById('password').focus();
+                }
+            }, 500);
+        }
+        
+        // Vérifier si l'utilisateur a déjà accès
+        window.onload = function() {
+            if (sessionStorage.getItem('soulful_access_' + window.location.pathname) === 'granted') {
+                document.getElementById('login-form').style.display = 'none';
+                const protectedContent = document.getElementById('protected-content');
+                const decodedContent = atob(encodedContent);
+                protectedContent.innerHTML = decodedContent;
+                protectedContent.style.display = 'block';
+            }
+        };
+    </script>
+</body>
+</html>
